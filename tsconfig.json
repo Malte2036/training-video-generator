@@ -18,7 +18,8 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/pages/*": ["pages/*"]
+      "@/pages/*": ["pages/*"],
+      "@/contexts/*": ["contexts/*"]
     }
   },
   "include": ["."],
