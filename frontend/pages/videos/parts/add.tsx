@@ -1,9 +1,11 @@
 import { AppwriteContext } from "@/contexts/AppwriteContext"
 import { Button, Input } from "@mui/material"
+import { useRouter } from "next/router"
 import { FormEvent, useContext, useState } from "react"
 
 function AddVideoPartPage() {
     const appwrite = useContext(AppwriteContext)
+    const router = useRouter();
 
     const [youtubeVideoId, setYoutubeVideoId] = useState<string>("")
     const [start, setStart] = useState<number | null>()
@@ -11,7 +13,9 @@ function AddVideoPartPage() {
 
     async function createVideoPart(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        appwrite.database.createDocument(process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_PARTS_ID ?? "", "unique()", { youtubeVideoId, start, end })
+        appwrite.database.createDocument(process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_PARTS_ID ?? "", "unique()", { youtubeVideoId, start, end }).then(() => {
+            router.push("/videos/parts")
+        })
     }
 
     return <>
