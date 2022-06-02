@@ -1,4 +1,5 @@
 import { AppwriteContext } from "@/contexts/AppwriteContext"
+import { Button, Input } from "@mui/material"
 import { FormEvent, useContext, useState } from "react"
 
 function AddVideoPartPage() {
@@ -16,10 +17,10 @@ function AddVideoPartPage() {
     return <>
         <h1>AddVideoPartPage</h1>
         <form onSubmit={(event) => createVideoPart(event)}>
-            <input placeholder="youtubeVideoId" required value={youtubeVideoId} onChange={(event) => setYoutubeVideoId(event.target.value)}></input>
-            <input placeholder="start" type={"number"} required value={start ?? ""} onChange={(event) => setStart(Number.parseInt(event.target.value))}></input>
-            <input placeholder="end" type={"number"} required value={end ?? ""} onChange={(event) => setEnd(Number.parseInt(event.target.value))}></input>
-            <button type="submit">Submit</button>
+            <Input placeholder="youtubeVideoId" required value={youtubeVideoId} onChange={(event) => setYoutubeVideoId(event.target.value)}></Input>
+            <Input placeholder="start" type={"number"} required value={start ?? ""} onChange={(event) => setStart(Number.parseInt(event.target.value))}></Input>
+            <Input placeholder="end" type={"number"} required value={end ?? ""} onChange={(event) => setEnd(Number.parseInt(event.target.value))}></Input>
+            <Button type="submit">Submit</Button>
         </form>
     </>
 }
