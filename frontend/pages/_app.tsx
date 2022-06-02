@@ -21,7 +21,7 @@ export default function TrainingApp({ Component, pageProps }: AppProps) {
             setSessionCreated(true)
         }
         createSession();
-    }, [])
+    }, [appwrite.account])
 
     if (!sessionCreated) {
         return <>creating session...</>
