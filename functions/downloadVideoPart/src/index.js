@@ -9,11 +9,13 @@ module.exports = async function (req, res) {
     logString += param + " \n";
   }
 
-  async function downloadVideo(youtubeVideoId, filename) {
+  async function downloadVideo(youtubeVideoId, filename, start) {
     await new Promise((resolve, reject) => {
-      const stream = ytdl(`https://www.youtube.com/watch?v=${youtubeVideoId}`).pipe(
-        fs.createWriteStream(filename)
-      );
+      const stream = ytdl(`https://www.youtube.com/watch?v=${youtubeVideoId}`, {
+        // TODO: "begin" not working
+        begin: `${start}s`,
+        quality: "135",
+      }).pipe(fs.createWriteStream(filename));
 
       stream.on("finish", () => {
         log("downloaded video");
@@ -47,7 +49,7 @@ module.exports = async function (req, res) {
 
   const filename = crypto.randomUUID();
 
-  await downloadVideo(youtubeVideoId, filename);
+  await downloadVideo(youtubeVideoId, filename, start);
 
   await storage.createFile("video_parts", "unique()", filename);
 
