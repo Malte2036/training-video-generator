@@ -44,7 +44,24 @@ export default function VideoPartsPage() {
 					<TableBody>
 						{videoParts.map((videoPart) => (
 							<TableRow key={videoPart.$id}>
-								<TableCell>{videoPart.youtubeVideoId}</TableCell>
+								<TableCell
+									onClick={async () => {
+										if (videoPart.storageId) {
+											const filePreviewUrl = appwrite.storage.getFileView(
+												process.env
+													.NEXT_PUBLIC_APPWRITE_BUCKET_VIDEO_PARTS_ID ?? '',
+												videoPart.storageId
+											);
+											router.push(filePreviewUrl);
+										} else {
+											router.reload();
+										}
+									}}
+								>
+									<span style={{ cursor: 'pointer' }}>
+										{videoPart.youtubeVideoId}
+									</span>
+								</TableCell>
 								<TableCell>{videoPart.start}</TableCell>
 								<TableCell>{videoPart.end}</TableCell>
 							</TableRow>
