@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "@/pages/*": ["pages/*"],
-      "@/contexts/*": ["contexts/*"]
+      "@/contexts/*": ["contexts/*"],
+      "@/models/*": ["models/*"]
     }
   },
   "include": ["."],

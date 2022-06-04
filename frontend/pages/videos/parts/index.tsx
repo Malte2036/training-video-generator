@@ -1,6 +1,6 @@
 import { AppwriteContext } from "@/contexts/AppwriteContext"
+import { VideoPart } from "@/models/VideoPart";
 import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import { VideoPart } from "models/VideoPart";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react"
 
