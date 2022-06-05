@@ -1,10 +1,11 @@
-import { auth } from '@/contexts/FirebaseContext';
+import { FirebaseContext } from '@/contexts/FirebaseContext';
 import { Button } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 
 function HomePage() {
+	const firebaseContext = useContext(FirebaseContext);
 	const router = useRouter();
 
 	return (
@@ -14,7 +15,7 @@ function HomePage() {
 			<Link href={'/videos/parts'}>VideoPartsPage</Link>
 			<Button
 				onClick={async () => {
-					await auth.signOut();
+					await firebaseContext.auth.signOut();
 					router.reload();
 				}}
 			>

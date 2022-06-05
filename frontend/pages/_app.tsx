@@ -9,18 +9,17 @@ import {
 	signInWithPopup,
 	signInWithRedirect,
 } from 'firebase/auth';
-import { app, auth } from '@/contexts/FirebaseContext';
+import { FirebaseContext } from '@/contexts/FirebaseContext';
 
 export default function TrainingApp({ Component, pageProps }: AppProps) {
+	const firebaseContext = useContext(FirebaseContext);
 	const [loggedIn, setLoggedIn] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
-		onAuthStateChanged(auth, (user) => {
+		onAuthStateChanged(firebaseContext.auth, (user) => {
 			setLoggedIn(user != null);
 		});
 	}, []);
-
-	useEffect(() => {}, []);
 
 	if (loggedIn === undefined) {
 		return <>checkLoggedIn...</>;
@@ -30,7 +29,7 @@ export default function TrainingApp({ Component, pageProps }: AppProps) {
 				<Button
 					onClick={() => {
 						const provider = new GoogleAuthProvider();
-						signInWithRedirect(auth, provider);
+						signInWithRedirect(firebaseContext.auth, provider);
 					}}
 				>
 					Google Login

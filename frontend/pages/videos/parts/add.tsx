@@ -1,4 +1,4 @@
-import { db } from '@/contexts/FirebaseContext';
+import { FirebaseContext } from '@/contexts/FirebaseContext';
 import { VideoPart, videoPartConverter } from '@/models/VideoPart';
 import { Button, Input } from '@mui/material';
 import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { FormEvent, useContext, useState } from 'react';
 
 function AddVideoPartPage() {
+	const firebaseContext = useContext(FirebaseContext);
 	const router = useRouter();
 
 	const [youtubeVideoId, setYoutubeVideoId] = useState<string>('');
@@ -14,7 +15,9 @@ function AddVideoPartPage() {
 
 	async function createVideoPart(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const ref = collection(db, 'VideoParts').withConverter(videoPartConverter);
+		const ref = collection(firebaseContext.db, 'VideoParts').withConverter(
+			videoPartConverter
+		);
 		await addDoc(ref, new VideoPart('', youtubeVideoId, start ?? 0, end ?? 0));
 		router.push('/videos/parts');
 	}

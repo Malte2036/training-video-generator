@@ -12,16 +12,19 @@ import {
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/contexts/FirebaseContext';
+import { FirebaseContext } from '@/contexts/FirebaseContext';
 
 export default function VideoPartsPage() {
+	const firebaseContext = useContext(FirebaseContext);
 	const router = useRouter();
 
 	const [videoParts, setVideoParts] = useState<VideoPart[]>([]);
 
 	useEffect(() => {
 		const fetchVideoParts = async () => {
-			const querySnapshot = await getDocs(collection(db, 'VideoParts'));
+			const querySnapshot = await getDocs(
+				collection(firebaseContext.db, 'VideoParts')
+			);
 			setVideoParts(
 				querySnapshot.docs.map((doc) =>
 					videoPartConverter.fromFirestore(doc, undefined)
