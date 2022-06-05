@@ -1,4 +1,5 @@
 import { AppwriteContext } from '@/contexts/AppwriteContext';
+import { auth } from '@/contexts/FirebaseContext';
 import { Button } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -16,7 +17,7 @@ function HomePage() {
 			<Link href={'/videos/parts'}>VideoPartsPage</Link>
 			<Button
 				onClick={async () => {
-					await appwrite.account.deleteSessions();
+					await auth.signOut();
 					router.reload();
 				}}
 			>

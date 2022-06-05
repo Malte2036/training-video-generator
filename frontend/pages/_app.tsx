@@ -2,38 +2,40 @@ import { AppwriteContext } from '@/contexts/AppwriteContext';
 import { Button } from '@mui/material';
 import { AppProps } from 'next/app';
 import { useContext, useEffect, useState } from 'react';
+import {
+	getAuth,
+	getRedirectResult,
+	GoogleAuthProvider,
+	onAuthStateChanged,
+	signInWithPopup,
+	signInWithRedirect,
+} from 'firebase/auth';
+import { app, auth } from '@/contexts/FirebaseContext';
 
 export default function TrainingApp({ Component, pageProps }: AppProps) {
-	const appwrite = useContext(AppwriteContext);
-
 	const [loggedIn, setLoggedIn] = useState<boolean | undefined>(undefined);
 
-	async function oAuthLogin(provider: 'discord' | 'github') {
-		appwrite.account.createOAuth2Session(
-			provider,
-			`${window.location.href}`,
-			`${window.location.href}#error`
-		);
-	}
-
 	useEffect(() => {
-		async function checkLoggedIn() {
-			let session;
-			try {
-				session = await appwrite.account.get();
-			} catch (error) {}
-			setLoggedIn(session ? true : false);
-		}
-		checkLoggedIn();
-	}, [appwrite.account]);
+		onAuthStateChanged(auth, (user) => {
+			setLoggedIn(user != null);
+		});
+	}, []);
+
+	useEffect(() => {}, []);
 
 	if (loggedIn === undefined) {
 		return <>checkLoggedIn...</>;
 	} else if (!loggedIn) {
 		return (
 			<>
-				<Button onClick={() => oAuthLogin('discord')}>Discord Login</Button>
-				<Button onClick={() => oAuthLogin('github')}>GitHub Login</Button>
+				<Button
+					onClick={() => {
+						const provider = new GoogleAuthProvider();
+						signInWithRedirect(auth, provider);
+					}}
+				>
+					Google Login
+				</Button>
 			</>
 		);
 	}
