@@ -47,11 +47,28 @@ module.exports = async function (req, res) {
   const data = JSON.parse(req.env["APPWRITE_FUNCTION_EVENT_DATA"]);
   const { youtubeVideoId, start, end } = data;
 
-  const filename = crypto.randomUUID();
+  const filename = crypto.randomUUID() + ".mp4";
 
   await downloadVideo(youtubeVideoId, filename, start);
 
-  await storage.createFile("video_parts", "unique()", filename);
+  log(`${__dirname}/../ffmpeg -i ${filename} -vf trim=${start}:${end} cut.mp4`);
+
+  await new Promise((resolve, reject) => {
+    const { exec } = require("child_process");
+
+    exec(
+      `yes | ${__dirname}/../ffmpeg -i ${filename} -vf trim=${start}:${end} cut.mp4`,
+      (error, stdout, stderr) => {
+        //ffmpeg logs to stderr, but typically output is in stdout.
+        log(error);
+        log(stdout);
+        log(stderr);
+        resolve();
+      }
+    );
+  });
+
+  //await storage.createFile("video_parts", "unique()", "cut.mp4");
 
   log(`video ${filename} created`);
 
@@ -60,3 +77,17 @@ module.exports = async function (req, res) {
     data,
   });
 };
+/*
+const { exec } = require("child_process");
+
+exec(
+  `yes | ${__dirname}/../ffmpeg -i ../13245034-a16a-4061-8678-f409eb0f5009.mp4 -vf trim=48:61 cut.mp4`,
+  (error, stdout, stderr) => {
+    //ffmpeg logs to stderr, but typically output is in stdout.
+    console.log(error);
+    console.log(stdout);
+    console.log(stderr);
+    //resolve();
+  }
+);
+*/
