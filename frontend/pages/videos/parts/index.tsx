@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { FirebaseContext } from '@/contexts/FirebaseContext';
 
 export default function VideoPartsPage() {
@@ -44,6 +44,7 @@ export default function VideoPartsPage() {
 							<TableCell>youtubeId</TableCell>
 							<TableCell>start</TableCell>
 							<TableCell>end</TableCell>
+							<TableCell></TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -56,6 +57,18 @@ export default function VideoPartsPage() {
 								</TableCell>
 								<TableCell>{videoPart.start}</TableCell>
 								<TableCell>{videoPart.end}</TableCell>
+								<TableCell>
+									<Button
+										onClick={async () => {
+											await deleteDoc(
+												doc(firebaseContext.db, 'VideoParts', videoPart.$id)
+											);
+											router.reload();
+										}}
+									>
+										delete
+									</Button>
+								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
