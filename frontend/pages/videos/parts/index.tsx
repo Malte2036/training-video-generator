@@ -1,5 +1,4 @@
-import { AppwriteContext } from '@/contexts/AppwriteContext';
-import { VideoPart } from '@/models/VideoPart';
+import { VideoPart, videoPartConverter } from '@/models/VideoPart';
 import {
 	Button,
 	Paper,
@@ -12,22 +11,25 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/contexts/FirebaseContext';
 
 export default function VideoPartsPage() {
-	const appwrite = useContext(AppwriteContext);
 	const router = useRouter();
 
 	const [videoParts, setVideoParts] = useState<VideoPart[]>([]);
 
 	useEffect(() => {
-		appwrite.database
-			.listDocuments(
-				process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_PARTS_ID ?? ''
-			)
-			.then((docs) => {
-				setVideoParts(docs.documents.map((doc) => doc as VideoPart));
-			});
-	}, [appwrite.database]);
+		const fetchVideoParts = async () => {
+			const querySnapshot = await getDocs(collection(db, 'VideoParts'));
+			setVideoParts(
+				querySnapshot.docs.map((doc) =>
+					videoPartConverter.fromFirestore(doc, undefined)
+				)
+			);
+		};
+		fetchVideoParts();
+	}, []);
 
 	return (
 		<>
@@ -44,20 +46,7 @@ export default function VideoPartsPage() {
 					<TableBody>
 						{videoParts.map((videoPart) => (
 							<TableRow key={videoPart.$id}>
-								<TableCell
-									onClick={async () => {
-										if (videoPart.storageId) {
-											const filePreviewUrl = appwrite.storage.getFileView(
-												process.env
-													.NEXT_PUBLIC_APPWRITE_BUCKET_VIDEO_PARTS_ID ?? '',
-												videoPart.storageId
-											);
-											router.push(filePreviewUrl);
-										} else {
-											router.reload();
-										}
-									}}
-								>
+								<TableCell>
 									<span style={{ cursor: 'pointer' }}>
 										{videoPart.youtubeVideoId}
 									</span>
