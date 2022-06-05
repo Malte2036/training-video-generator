@@ -1,10 +1,11 @@
-import { AppwriteContext } from '@/contexts/AppwriteContext';
+import { db } from '@/contexts/FirebaseContext';
+import { VideoPart, videoPartConverter } from '@/models/VideoPart';
 import { Button, Input } from '@mui/material';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { FormEvent, useContext, useState } from 'react';
 
 function AddVideoPartPage() {
-	const appwrite = useContext(AppwriteContext);
 	const router = useRouter();
 
 	const [youtubeVideoId, setYoutubeVideoId] = useState<string>('');
@@ -13,15 +14,9 @@ function AddVideoPartPage() {
 
 	async function createVideoPart(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		appwrite.database
-			.createDocument(
-				process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_VIDEO_PARTS_ID ?? '',
-				'unique()',
-				{ youtubeVideoId, start, end }
-			)
-			.then(() => {
-				router.push('/videos/parts');
-			});
+		const ref = collection(db, 'VideoParts').withConverter(videoPartConverter);
+		await addDoc(ref, new VideoPart('', youtubeVideoId, start ?? 0, end ?? 0));
+		router.push('/videos/parts');
 	}
 
 	return (
