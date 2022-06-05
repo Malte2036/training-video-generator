@@ -1,4 +1,3 @@
-import { AppwriteContext } from '@/contexts/AppwriteContext';
 import { auth } from '@/contexts/FirebaseContext';
 import { Button } from '@mui/material';
 import Link from 'next/link';
@@ -6,8 +5,6 @@ import { useRouter } from 'next/router';
 import { useContext } from 'react';
 
 function HomePage() {
-	const appwrite = useContext(AppwriteContext);
-
 	const router = useRouter();
 
 	return (

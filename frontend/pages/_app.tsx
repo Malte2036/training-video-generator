@@ -1,4 +1,3 @@
-import { AppwriteContext } from '@/contexts/AppwriteContext';
 import { Button } from '@mui/material';
 import { AppProps } from 'next/app';
 import { useContext, useEffect, useState } from 'react';
