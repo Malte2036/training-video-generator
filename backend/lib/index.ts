@@ -40,8 +40,18 @@ async function main() {
   const videoParts = await Promise.all(docs.map((doc) => doc.get()));
   videoParts.forEach((v) => console.log(v.data()));
 
-  const videoPart = videoParts[0].data();
-  await downloadVideo(videoPart!.youtubeVideoId, `temp/${videoPart!.youtubeVideoId}.mp4`, videoPart!.start, videoPart!.end);
+  await Promise.all(
+    videoParts
+      .map((videoPart) => videoPart.data())
+      .map((videoPart) =>
+        downloadVideo(
+          videoPart!.youtubeVideoId,
+          `temp/${videoPart!.youtubeVideoId}.mp4`,
+          videoPart!.start,
+          videoPart!.end
+        )
+      )
+  );
 }
 
 main();
