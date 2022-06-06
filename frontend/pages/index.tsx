@@ -12,6 +12,7 @@ function HomePage() {
 		<div>
 			<h1>Welcome to Training-Web!</h1>
 			<br />
+			<Link href={'/videos'}>VideosPage</Link>{' '}
 			<Link href={'/videos/parts'}>VideoPartsPage</Link>
 			<Button
 				onClick={async () => {
