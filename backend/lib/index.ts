@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import { createWriteStream } from "fs";
 import ytdl from "ytdl-core";
+import { deleteContentOfDir } from "./utils";
 
 var serviceAccount = require("../serviceAccountKey.json");
 
@@ -33,6 +34,8 @@ async function downloadVideo(
 }
 
 async function main() {
+  deleteContentOfDir("temp");
+
   const docs = await videoPartsCollection.listDocuments();
   const videoParts = await Promise.all(docs.map((doc) => doc.get()));
   videoParts.forEach((v) => console.log(v.data()));
