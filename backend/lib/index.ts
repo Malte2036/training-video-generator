@@ -25,7 +25,7 @@ async function downloadVideo(
   await new Promise((resolve, reject) => {
     const stream = ytdl(`https://www.youtube.com/watch?v=${youtubeVideoId}`, {
       begin: start,
-      quality: "136",
+      quality: "137",
     }).pipe(createWriteStream(filename));
 
     stream.on("finish", () => {
@@ -52,7 +52,7 @@ async function generateVideo(
           .addInput(`temp/${videoPart.data()!.youtubeVideoId}.avi`)
           .setStartTime(videoPart.data()!.start)
           .setDuration(videoPart.data()!.end - videoPart.data()!.start)
-          //.noAudio()
+          .noAudio()
           .saveToFile(`temp/${videoPart.id}.avi`)
           .on("error", function (err) {
             console.log("An error occurred: " + err.message);
@@ -100,6 +100,8 @@ async function main() {
   const filename = "generatedVideo";
   await generateVideo(videoParts, filename);
   await uploadVideoToStorage(filename);
+
+  deleteContentOfDir("temp");
 }
 
 main();
