@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import Ffmpeg from "fluent-ffmpeg";
 import { createWriteStream } from "fs";
 import ytdl from "ytdl-core";
 import { deleteContentOfDir } from "./utils";
@@ -21,16 +22,54 @@ async function downloadVideo(
 ) {
   await new Promise((resolve, reject) => {
     const stream = ytdl(`https://www.youtube.com/watch?v=${youtubeVideoId}`, {
-      //range: { start: secondToByte(start), end: secondToByte(end) },
       begin: start,
       quality: "136",
     }).pipe(createWriteStream(filename));
 
     stream.on("finish", () => {
-      console.log("downloaded video");
-      resolve("downloaded video");
+      console.log(`downloaded video ${youtubeVideoId}`);
+      resolve(`downloaded video ${youtubeVideoId}`);
     });
   });
+}
+
+async function generateVideo(
+  videoParts: admin.firestore.DocumentSnapshot[],
+  filename: string
+) {
+  await Promise.all(
+    videoParts.map(async (videoPart) => {
+      await new Promise(async (resolve, reject) => {
+        await downloadVideo(
+          videoPart.data()!.youtubeVideoId,
+          `temp/${videoPart.data()!.youtubeVideoId}.avi`,
+          videoPart.data()!.start,
+          videoPart.data()!.end
+        );
+        Ffmpeg()
+          .addInput(`temp/${videoPart.data()!.youtubeVideoId}.avi`)
+          .setStartTime(videoPart.data()!.start)
+          .setDuration(videoPart.data()!.end - videoPart.data()!.start)
+          //.noAudio()
+          .saveToFile(`temp/${videoPart.id}.avi`)
+          .on("error", function (err) {
+            console.log("An error occurred: " + err.message);
+            reject("An error occurred: " + err.message);
+          })
+          .on("end", function () {
+            console.log(`Cutting finished for ${videoPart.id} !`);
+            resolve(`Cutting finished for ${videoPart.id} !`);
+          });
+      });
+    })
+  );
+
+  const command = Ffmpeg();
+  videoParts.forEach((videoPart) =>
+    command.addInput(`temp/${videoPart.id}.avi`)
+  );
+
+  command.mergeToFile(`temp/${filename}.avi`);
 }
 
 async function main() {
@@ -40,18 +79,7 @@ async function main() {
   const videoParts = await Promise.all(docs.map((doc) => doc.get()));
   videoParts.forEach((v) => console.log(v.data()));
 
-  await Promise.all(
-    videoParts
-      .map((videoPart) => videoPart.data())
-      .map((videoPart) =>
-        downloadVideo(
-          videoPart!.youtubeVideoId,
-          `temp/${videoPart!.youtubeVideoId}.mp4`,
-          videoPart!.start,
-          videoPart!.end
-        )
-      )
-  );
+  await generateVideo(videoParts, "generatedVideo");
 }
 
 main();
