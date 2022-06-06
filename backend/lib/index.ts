@@ -8,9 +8,11 @@ var serviceAccount = require("../serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  storageBucket: "training-web-352414.appspot.com",
 });
 
 const firestore = admin.firestore();
+const storage = admin.storage();
 
 const videoPartsCollection = firestore.collection("VideoParts");
 
@@ -64,12 +66,28 @@ async function generateVideo(
     })
   );
 
-  const command = Ffmpeg();
-  videoParts.forEach((videoPart) =>
-    command.addInput(`temp/${videoPart.id}.avi`)
-  );
+  await new Promise(async (resolve, reject) => {
+    const command = Ffmpeg();
+    videoParts.forEach((videoPart) =>
+      command.addInput(`temp/${videoPart.id}.avi`)
+    );
 
-  command.mergeToFile(`temp/${filename}.avi`);
+    command
+      .mergeToFile(`temp/${filename}.mp4`)
+      .on("error", function (err) {
+        console.log("An error occurred: " + err.message);
+        reject("An error occurred: " + err.message);
+      })
+      .on("end", function () {
+        console.log(`merged video!!`);
+        resolve(`merged video!!`);
+      });
+  });
+}
+
+async function uploadVideoToStorage(filename: string) {
+  await storage.bucket().upload(`temp/${filename}.mp4`);
+  console.log("uploaded video to storage!");
 }
 
 async function main() {
@@ -79,7 +97,9 @@ async function main() {
   const videoParts = await Promise.all(docs.map((doc) => doc.get()));
   videoParts.forEach((v) => console.log(v.data()));
 
-  await generateVideo(videoParts, "generatedVideo");
+  const filename = "generatedVideo";
+  await generateVideo(videoParts, filename);
+  await uploadVideoToStorage(filename);
 }
 
 main();
