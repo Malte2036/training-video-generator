@@ -12,7 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "firebase-admin": "^10.2.0",
+    "fs": "^0.0.1-security",
     "ts-node": "^10.8.1",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.3",
+    "ytdl-core": "^4.11.0"
   }
 }
