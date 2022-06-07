@@ -1,11 +1,12 @@
+import GenerateRandomVideoForm from '@/components/GenerateRandomVideoForm';
 import { FirebaseContext } from '@/contexts/FirebaseContext';
 import {
 	GeneratedVideo,
 	generatedVideoConverter,
-	GeneratedVideoState,
 } from '@/models/GeneratedVideo';
 import {
 	Button,
+	Input,
 	Paper,
 	Table,
 	TableBody,
@@ -45,32 +46,6 @@ function VideosPage() {
 		};
 		fetchGeneratedVideos();
 	}, []);
-
-	async function generateRandomVideo() {
-		const querySnapshot = await getDocs(
-			collection(firebaseContext.db, 'VideoParts')
-		);
-
-		let allVideoPartIds = querySnapshot.docs.map((doc) => doc.id);
-
-		allVideoPartIds = allVideoPartIds
-			.map((value) => ({ value, sort: Math.random() }))
-			.sort((a, b) => a.sort - b.sort)
-			.map(({ value }) => value);
-
-		const videoPartIds = allVideoPartIds.slice(0, 2);
-		console.log(videoPartIds);
-
-		const ref = collection(firebaseContext.db, 'GeneratedVideos').withConverter(
-			generatedVideoConverter
-		);
-		await addDoc(
-			ref,
-			new GeneratedVideo('', videoPartIds, GeneratedVideoState.UNKNOWN, '')
-		);
-
-		router.reload();
-	}
 
 	return (
 		<div>
@@ -134,7 +109,7 @@ function VideosPage() {
 				</Table>
 			</TableContainer>
 			<br />
-			<Button onClick={generateRandomVideo}>Generate random</Button>
+			<GenerateRandomVideoForm />
 		</div>
 	);
 }

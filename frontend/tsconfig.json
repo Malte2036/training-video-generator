@@ -19,6 +19,7 @@
     "baseUrl": ".",
     "paths": {
       "@/pages/*": ["pages/*"],
+      "@/components/*": ["components/*"],
       "@/contexts/*": ["contexts/*"],
       "@/models/*": ["models/*"]
     }
