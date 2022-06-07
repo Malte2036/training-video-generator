@@ -4,6 +4,12 @@ import { createWriteStream } from "fs";
 import ytdl from "ytdl-core";
 import { deleteContentOfDir } from "./utils";
 
+enum GeneratedVideoState {
+  UNKNOWN = "unknown",
+  GENERATING = "generating",
+  GENERATED = "generated",
+}
+
 var serviceAccount = require("../serviceAccountKey.json");
 
 admin.initializeApp({
@@ -15,6 +21,7 @@ const firestore = admin.firestore();
 const storage = admin.storage();
 
 const videoPartsCollection = firestore.collection("VideoParts");
+const gneratedVideosCollection = firestore.collection("GeneratedVideos");
 
 async function downloadVideo(
   youtubeVideoId: string,
@@ -93,13 +100,39 @@ async function uploadVideoToStorage(filename: string) {
 async function main() {
   deleteContentOfDir("temp");
 
-  const docs = await videoPartsCollection.listDocuments();
-  const videoParts = await Promise.all(docs.map((doc) => doc.get()));
-  videoParts.forEach((v) => console.log(v.data()));
+  gneratedVideosCollection.onSnapshot(async (snapshot) => {
+    const snapshotDocsAdded = snapshot
+      .docChanges()
+      .filter((d) => d.type === "added")
+      .map((d) => d.doc);
 
-  const filename = "generatedVideo";
-  await generateVideo(videoParts, filename);
-  await uploadVideoToStorage(filename);
+    await Promise.all(
+      snapshotDocsAdded.map(async (doc) => {
+        if (
+          !doc.data().state ||
+          doc.data().state === GeneratedVideoState.UNKNOWN
+        ) {
+          gneratedVideosCollection
+            .doc(doc.id)
+            .update({ state: GeneratedVideoState.GENERATING });
+          const videoPartIds: string[] = doc.data().videoPartIds;
+          const videoParts = await Promise.all(
+            videoPartIds.map(
+              async (p) => await videoPartsCollection.doc(p).get()
+            )
+          );
+          videoParts.forEach((p) => console.log(p.data()));
+
+          const filename = doc.id;
+          await generateVideo(videoParts, filename);
+          await uploadVideoToStorage(filename);
+          gneratedVideosCollection
+            .doc(doc.id)
+            .update({ state: GeneratedVideoState.GENERATED });
+        }
+      })
+    );
+  });
 
   deleteContentOfDir("temp");
 }
