@@ -103,7 +103,7 @@ async function main() {
   gneratedVideosCollection.onSnapshot(async (snapshot) => {
     const snapshotDocsAdded = snapshot
       .docChanges()
-      .filter((d) => d.type === "added")
+      .filter((d) => d.type === "added" || d.type === "modified")
       .map((d) => d.doc);
 
     await Promise.all(
@@ -126,9 +126,10 @@ async function main() {
           const filename = doc.id;
           await generateVideo(videoParts, filename);
           await uploadVideoToStorage(filename);
-          gneratedVideosCollection
-            .doc(doc.id)
-            .update({ state: GeneratedVideoState.GENERATED });
+          gneratedVideosCollection.doc(doc.id).update({
+            state: GeneratedVideoState.GENERATED,
+            storageId: `${filename}.mp4`,
+          });
         }
       })
     );
