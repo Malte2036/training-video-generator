@@ -26,3 +26,5 @@ yarn-error.log*
 .next
 package-lock.json
 next.config.js
+
+out
