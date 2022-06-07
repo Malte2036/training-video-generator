@@ -46,6 +46,8 @@ function VideosPage() {
 					<TableHead>
 						<TableRow>
 							<TableCell>videoPartIds</TableCell>
+							<TableCell>state</TableCell>
+							<TableCell>storageId</TableCell>
 							<TableCell></TableCell>
 						</TableRow>
 					</TableHead>
@@ -59,6 +61,8 @@ function VideosPage() {
 										</span>
 									))}
 								</TableCell>
+								<TableCell>{video.state}</TableCell>
+								<TableCell>{video.storageId}</TableCell>
 								<TableCell>
 									<Button
 										onClick={async () => {
