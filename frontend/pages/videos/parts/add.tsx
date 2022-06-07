@@ -11,14 +11,27 @@ function AddVideoPartPage() {
 
 	const [youtubeVideoId, setYoutubeVideoId] = useState<string>('');
 	const [start, setStart] = useState<number | null>();
-	const [end, setEnd] = useState<number | null>();
+	const [length, setLength] = useState<number | null>();
+	const [repeat, setRepeat] = useState<number | null>();
 
 	async function createVideoPart(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+
 		const ref = collection(firebaseContext.db, 'VideoParts').withConverter(
 			videoPartConverter
 		);
-		await addDoc(ref, new VideoPart('', youtubeVideoId, start ?? 0, end ?? 0));
+
+		const repeatTimes = repeat ?? 1;
+		for (let i = 0; i < repeatTimes; i++) {
+			const currentStart = (start ?? 0) + length! * i;
+			await addDoc(
+				ref,
+				new VideoPart('', youtubeVideoId, currentStart, currentStart + length!)
+			);
+			console.log(
+				`created: ${youtubeVideoId} ${currentStart}:${currentStart + length!}`
+			);
+		}
 		router.push('/videos/parts');
 	}
 
@@ -40,11 +53,17 @@ function AddVideoPartPage() {
 					onChange={(event) => setStart(Number.parseInt(event.target.value))}
 				></Input>
 				<Input
-					placeholder="end"
+					placeholder="length"
 					type={'number'}
 					required
-					value={end ?? ''}
-					onChange={(event) => setEnd(Number.parseInt(event.target.value))}
+					value={length ?? ''}
+					onChange={(event) => setLength(Number.parseInt(event.target.value))}
+				></Input>
+				<Input
+					placeholder="repeat"
+					type={'number'}
+					value={repeat ?? ''}
+					onChange={(event) => setRepeat(Number.parseInt(event.target.value))}
 				></Input>
 				<Button type="submit">Submit</Button>
 			</form>
