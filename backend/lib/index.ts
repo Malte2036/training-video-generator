@@ -23,15 +23,9 @@ const storage = admin.storage();
 const videoPartsCollection = firestore.collection("VideoParts");
 const gneratedVideosCollection = firestore.collection("GeneratedVideos");
 
-async function downloadVideo(
-  youtubeVideoId: string,
-  filename: string,
-  start: number,
-  end: number
-) {
+async function downloadVideo(youtubeVideoId: string, filename: string) {
   await new Promise((resolve, reject) => {
     const stream = ytdl(`https://www.youtube.com/watch?v=${youtubeVideoId}`, {
-      begin: start,
       quality: "137",
     }).pipe(createWriteStream(filename));
 
@@ -47,18 +41,22 @@ async function generateVideo(
   filename: string
 ) {
   await Promise.all(
+    Array.from(
+      new Set(videoParts.map((videoPart) => videoPart.data()!.youtubeVideoId))
+    ).map(async (youtubeVideoId) => {
+      console.log(`start download ${youtubeVideoId}`);
+      await downloadVideo(youtubeVideoId, `temp/${youtubeVideoId}.avi`);
+    })
+  );
+
+  await Promise.all(
     videoParts.map(async (videoPart) => {
       await new Promise(async (resolve, reject) => {
-        await downloadVideo(
-          videoPart.data()!.youtubeVideoId,
-          `temp/${videoPart.data()!.youtubeVideoId}.avi`,
-          videoPart.data()!.start,
-          videoPart.data()!.end
-        );
+        const data = videoPart.data()!;
         Ffmpeg()
-          .addInput(`temp/${videoPart.data()!.youtubeVideoId}.avi`)
-          .setStartTime(videoPart.data()!.start)
-          .setDuration(videoPart.data()!.end - videoPart.data()!.start)
+          .addInput(`temp/${data.youtubeVideoId}.avi`)
+          .setStartTime(data.start)
+          .setDuration(data.end - data.start)
           .noAudio()
           .saveToFile(`temp/${videoPart.id}.avi`)
           .on("error", function (err) {
