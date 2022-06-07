@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 import { createContext } from 'react';
 
 export class Firebase {
@@ -22,6 +23,7 @@ export class Firebase {
 	public app = initializeApp(this.firebaseConfig);
 	public auth = getAuth(this.app);
 	public db = getFirestore(this.app);
+	public storage = getStorage(this.app);
 }
 
 const firebase = new Firebase();

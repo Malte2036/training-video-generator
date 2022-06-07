@@ -14,6 +14,7 @@ import {
 	TableRow,
 } from '@mui/material';
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { getDownloadURL, ref } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
@@ -49,6 +50,7 @@ function VideosPage() {
 							<TableCell>state</TableCell>
 							<TableCell>storageId</TableCell>
 							<TableCell></TableCell>
+							<TableCell></TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -63,6 +65,22 @@ function VideosPage() {
 								</TableCell>
 								<TableCell>{video.state}</TableCell>
 								<TableCell>{video.storageId}</TableCell>
+								<TableCell>
+									<Button
+										onClick={async () => {
+											if (video.storageId) {
+												const pathReference = ref(
+													firebaseContext.storage,
+													video.storageId
+												);
+												const url = await getDownloadURL(pathReference);
+												router.push(url);
+											}
+										}}
+									>
+										view
+									</Button>
+								</TableCell>
 								<TableCell>
 									<Button
 										onClick={async () => {
