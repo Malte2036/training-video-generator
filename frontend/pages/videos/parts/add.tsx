@@ -24,13 +24,12 @@ function AddVideoPartPage() {
 		const repeatTimes = repeat ?? 1;
 		for (let i = 0; i < repeatTimes; i++) {
 			const currentStart = (start ?? 0) + length! * i;
+			const currentEnd = currentStart + length! - 1;
 			await addDoc(
 				ref,
-				new VideoPart('', youtubeVideoId, currentStart, currentStart + length!)
+				new VideoPart('', youtubeVideoId, currentStart, currentEnd)
 			);
-			console.log(
-				`created: ${youtubeVideoId} ${currentStart}:${currentStart + length!}`
-			);
+			console.log(`created: ${youtubeVideoId} ${currentStart}:${currentEnd}`);
 		}
 		router.push('/videos/parts');
 	}
