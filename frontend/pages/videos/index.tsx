@@ -99,20 +99,22 @@ function VideosPage() {
 								<TableCell>{video.state}</TableCell>
 								<TableCell>{video.storageId}</TableCell>
 								<TableCell>
-									<Button
-										onClick={async () => {
-											if (video.storageId) {
-												const pathReference = ref(
-													firebaseContext.storage,
-													video.storageId
-												);
-												const url = await getDownloadURL(pathReference);
-												router.push(url);
-											}
-										}}
-									>
-										view
-									</Button>
+									{video.storageId && (
+										<Button
+											onClick={async () => {
+												if (video.storageId) {
+													const pathReference = ref(
+														firebaseContext.storage,
+														video.storageId
+													);
+													const url = await getDownloadURL(pathReference);
+													router.push(url);
+												}
+											}}
+										>
+											view
+										</Button>
+									)}
 								</TableCell>
 								<TableCell>
 									<Button
