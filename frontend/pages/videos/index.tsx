@@ -6,7 +6,6 @@ import {
 } from '@/models/GeneratedVideo';
 import {
 	Button,
-	Input,
 	Paper,
 	Table,
 	TableBody,
@@ -16,11 +15,11 @@ import {
 	TableRow,
 } from '@mui/material';
 import {
-	addDoc,
 	collection,
 	deleteDoc,
 	doc,
 	getDocs,
+	onSnapshot,
 } from 'firebase/firestore';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { useRouter } from 'next/router';
@@ -45,6 +44,19 @@ function VideosPage() {
 			console.log(generatedVideos);
 		};
 		fetchGeneratedVideos();
+
+		const unsubscribe = onSnapshot(
+			collection(firebaseContext.db, 'GeneratedVideos'),
+			(querySnapshot) => {
+				console.log(querySnapshot);
+				setGeneratedVideos(
+					querySnapshot.docs.map((doc) =>
+						generatedVideoConverter.fromFirestore(doc, undefined)
+					)
+				);
+			}
+		);
+		return () => unsubscribe();
 	}, []);
 
 	return (
@@ -97,7 +109,6 @@ function VideosPage() {
 											await deleteDoc(
 												doc(firebaseContext.db, 'GeneratedVideos', video.$id)
 											);
-											router.reload();
 										}}
 									>
 										delete

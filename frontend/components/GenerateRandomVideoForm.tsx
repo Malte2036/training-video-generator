@@ -11,7 +11,6 @@ import { FormEvent, useContext, useState } from 'react';
 
 export default function GenerateRandomVideoForm() {
 	const firebaseContext = useContext(FirebaseContext);
-	const router = useRouter();
 
 	const [count, setCount] = useState<number | null>();
 	async function generateRandomVideo(event: FormEvent<HTMLFormElement>) {
@@ -37,8 +36,6 @@ export default function GenerateRandomVideoForm() {
 			ref,
 			new GeneratedVideo('', videoPartIds, GeneratedVideoState.UNKNOWN, '')
 		);
-
-		router.reload();
 	}
 
 	return (
