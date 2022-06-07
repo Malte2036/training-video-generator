@@ -96,7 +96,9 @@ async function uploadVideoToStorage(filename: string) {
 }
 
 async function main() {
-  deleteContentOfDir("temp");
+  try {
+    deleteContentOfDir("temp");
+  } catch (error) {}
 
   gneratedVideosCollection.onSnapshot(async (snapshot) => {
     const snapshotDocsAdded = snapshot
@@ -132,8 +134,6 @@ async function main() {
       })
     );
   });
-
-  deleteContentOfDir("temp");
 }
 
 main();
