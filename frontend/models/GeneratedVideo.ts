@@ -30,7 +30,7 @@ export class GeneratedVideo {
 export const generatedVideoConverter = {
 	toFirestore: (generatedVideo: GeneratedVideo) => {
 		return {
-			videoParts: generatedVideo.videoPartIds,
+			videoPartIds: generatedVideo.videoPartIds,
 			state: generatedVideo.state,
 			storageId: generatedVideo.storageId,
 		};
