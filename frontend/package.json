@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && next export",
-    "start": "next start",
+    "dev": "NODE_ENV=development && next dev",
+    "build": "NODE_ENV=production && next build && next export",
+    "start": "NODE_ENV=production && next start",
     "lint": "next lint"
   },
   "eslintConfig": {
