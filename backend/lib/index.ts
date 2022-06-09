@@ -21,6 +21,9 @@ const firestore = admin.firestore();
 const storage = admin.storage();
 
 const videoPartsCollection = firestore.collection("VideoParts");
+const youtubeVideoMetadataCollection = firestore.collection(
+  "YoutubeVideoMetadata"
+);
 const generatedVideosCollection = firestore.collection("GeneratedVideos");
 
 async function downloadVideo(youtubeVideoId: string, filename: string) {
@@ -133,6 +136,37 @@ async function main() {
         }
       })
     );
+
+    videoPartsCollection.onSnapshot(async (snapshot) => {
+      const snapshotDocsAdded = snapshot
+        .docChanges()
+        .filter((d) => d.type === "added" || d.type === "modified")
+        .map((d) => d.doc);
+
+      await Promise.all(
+        Array.from(
+          new Set(
+            snapshotDocsAdded.map(
+              (videoPart) => videoPart.data()!.youtubeVideoId
+            )
+          )
+        ).map(async (youtubeVideoId) => {
+          const info = await ytdl.getBasicInfo(youtubeVideoId);
+          const docData = {
+            title: info.videoDetails.title,
+            authorName: info.videoDetails.author.name,
+          };
+
+          const ref = youtubeVideoMetadataCollection.doc(youtubeVideoId);
+          if (!(await ref.get()).exists) {
+            ref.set(docData);
+          } else {
+            ref.update(docData);
+          }
+          console.log(`Add YoutubeMetadata for ${youtubeVideoId}`)
+        })
+      );
+    });
   });
 }
 
