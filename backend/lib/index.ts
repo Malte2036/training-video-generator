@@ -21,7 +21,7 @@ const firestore = admin.firestore();
 const storage = admin.storage();
 
 const videoPartsCollection = firestore.collection("VideoParts");
-const gneratedVideosCollection = firestore.collection("GeneratedVideos");
+const generatedVideosCollection = firestore.collection("GeneratedVideos");
 
 async function downloadVideo(youtubeVideoId: string, filename: string) {
   await new Promise((resolve, reject) => {
@@ -100,7 +100,7 @@ async function main() {
     deleteContentOfDir("temp");
   } catch (error) {}
 
-  gneratedVideosCollection.onSnapshot(async (snapshot) => {
+  generatedVideosCollection.onSnapshot(async (snapshot) => {
     const snapshotDocsAdded = snapshot
       .docChanges()
       .filter((d) => d.type === "added" || d.type === "modified")
@@ -112,7 +112,7 @@ async function main() {
           !doc.data().state ||
           doc.data().state === GeneratedVideoState.UNKNOWN
         ) {
-          gneratedVideosCollection
+          generatedVideosCollection
             .doc(doc.id)
             .update({ state: GeneratedVideoState.GENERATING });
           const videoPartIds: string[] = doc.data().videoPartIds;
@@ -126,7 +126,7 @@ async function main() {
           const filename = doc.id;
           await generateVideo(videoParts, filename);
           await uploadVideoToStorage(filename);
-          gneratedVideosCollection.doc(doc.id).update({
+          generatedVideosCollection.doc(doc.id).update({
             state: GeneratedVideoState.GENERATED,
             storageId: `${filename}.mp4`,
           });
