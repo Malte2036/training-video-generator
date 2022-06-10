@@ -68,6 +68,8 @@ export default function VideoPartsPage() {
 							<TableCell>youtubeId</TableCell>
 							<TableCell>authorName</TableCell>
 							<TableCell>title</TableCell>
+							<TableCell>start</TableCell>
+							<TableCell>count</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -91,6 +93,24 @@ export default function VideoPartsPage() {
 											youtubeVideoMetadatas.find(
 												(metadata) => metadata.$id == youtubeVideoId
 											)?.title
+										}
+									</TableCell>,
+									<TableCell>
+										{
+											videoParts
+												.filter(
+													(videoPart) =>
+														videoPart.youtubeVideoId == youtubeVideoId
+												)
+												.sort((a, b) => a.start - b.start)[0].start
+										}
+									</TableCell>,
+									<TableCell>
+										{
+											videoParts.filter(
+												(videoPart) =>
+													videoPart.youtubeVideoId == youtubeVideoId
+											).length
 										}
 									</TableCell>,
 								]}
