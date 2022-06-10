@@ -4,7 +4,7 @@ import {
 	generatedVideoConverter,
 	GeneratedVideoState,
 } from '@/models/GeneratedVideo';
-import { addDoc, collection, getDocs } from '@firebase/firestore';
+import { addDoc, collection, getDocs, Timestamp } from '@firebase/firestore';
 import { Button, Input } from '@mui/material';
 import { useRouter } from 'next/router';
 import { FormEvent, useContext, useState } from 'react';
@@ -34,7 +34,13 @@ export default function GenerateRandomVideoForm() {
 		);
 		await addDoc(
 			ref,
-			new GeneratedVideo('', videoPartIds, GeneratedVideoState.UNKNOWN, '')
+			new GeneratedVideo(
+				'',
+				videoPartIds,
+				Timestamp.now(),
+				GeneratedVideoState.UNKNOWN,
+				''
+			)
 		);
 	}
 

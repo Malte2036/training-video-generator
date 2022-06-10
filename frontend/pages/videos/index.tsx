@@ -66,6 +66,7 @@ function VideosPage() {
 				<Table>
 					<TableHead>
 						<TableRow>
+							<TableCell>timestamp</TableCell>
 							<TableCell>videoPartIds</TableCell>
 							<TableCell>state</TableCell>
 							<TableCell>storageId</TableCell>
@@ -74,48 +75,57 @@ function VideosPage() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{generatedVideos.map((video) => (
-							<TableRow key={video.$id}>
-								<TableCell>
-									{video.videoPartIds.map((id) => (
-										<span key={id} style={{ cursor: 'pointer' }}>
-											{`${id}, `}
-										</span>
-									))}
-								</TableCell>
-								<TableCell>{video.state}</TableCell>
-								<TableCell>{video.storageId}</TableCell>
-								<TableCell>
-									{video.storageId && (
+						{generatedVideos
+							.sort(
+								(a, b) =>
+									(a.timestamp?.toMillis() ?? 0) -
+									(b.timestamp?.toMillis() ?? 0)
+							)
+							.map((video) => (
+								<TableRow key={video.$id}>
+									<TableCell>
+										{video.timestamp?.toDate().toLocaleString() ?? 'unknown'}
+									</TableCell>
+									<TableCell>
+										{video.videoPartIds.map((id) => (
+											<span key={id} style={{ cursor: 'pointer' }}>
+												{`${id}, `}
+											</span>
+										))}
+									</TableCell>
+									<TableCell>{video.state}</TableCell>
+									<TableCell>{video.storageId}</TableCell>
+									<TableCell>
+										{video.storageId && (
+											<Button
+												onClick={async () => {
+													if (video.storageId) {
+														const pathReference = ref(
+															firebaseContext.storage,
+															video.storageId
+														);
+														const url = await getDownloadURL(pathReference);
+														router.push(url);
+													}
+												}}
+											>
+												view
+											</Button>
+										)}
+									</TableCell>
+									<TableCell>
 										<Button
 											onClick={async () => {
-												if (video.storageId) {
-													const pathReference = ref(
-														firebaseContext.storage,
-														video.storageId
-													);
-													const url = await getDownloadURL(pathReference);
-													router.push(url);
-												}
+												await deleteDoc(
+													doc(firebaseContext.db, 'GeneratedVideos', video.$id)
+												);
 											}}
 										>
-											view
+											delete
 										</Button>
-									)}
-								</TableCell>
-								<TableCell>
-									<Button
-										onClick={async () => {
-											await deleteDoc(
-												doc(firebaseContext.db, 'GeneratedVideos', video.$id)
-											);
-										}}
-									>
-										delete
-									</Button>
-								</TableCell>
-							</TableRow>
-						))}
+									</TableCell>
+								</TableRow>
+							))}
 					</TableBody>
 				</Table>
 			</TableContainer>
