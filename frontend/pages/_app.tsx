@@ -10,6 +10,7 @@ import {
 	signInWithRedirect,
 } from 'firebase/auth';
 import { FirebaseContext } from '@/contexts/FirebaseContext';
+import Header from '@/components/Header';
 
 export default function TrainingApp({ Component, pageProps }: AppProps) {
 	const firebaseContext = useContext(FirebaseContext);
@@ -37,5 +38,10 @@ export default function TrainingApp({ Component, pageProps }: AppProps) {
 			</>
 		);
 	}
-	return <Component {...pageProps} />;
+	return (
+		<>
+			<Header />
+			<Component {...pageProps} />
+		</>
+	);
 }
