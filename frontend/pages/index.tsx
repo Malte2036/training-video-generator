@@ -9,7 +9,11 @@ function HomePage() {
 
 	return (
 		<div>
-			<h1>Welcome to Training-Web!</h1>
+			<h1>
+				Welcome to Training-Web {firebaseContext.auth.currentUser?.displayName}
+			</h1>
+			<span>{firebaseContext.auth.currentUser?.uid}</span>
+			<br />
 			<br />
 			<Button
 				onClick={async () => {
