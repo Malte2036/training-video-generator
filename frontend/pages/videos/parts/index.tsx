@@ -14,12 +14,19 @@ import { useContext, useEffect, useState } from 'react';
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { FirebaseContext } from '@/contexts/FirebaseContext';
 import ExpandableRow from '@/components/ExpandableRow';
+import {
+	YoutubeVideoMetadata,
+	youtubeVideoMetadataConverter,
+} from '@/models/YoutubeVideoMetadata';
 
 export default function VideoPartsPage() {
 	const firebaseContext = useContext(FirebaseContext);
 	const router = useRouter();
 
 	const [videoParts, setVideoParts] = useState<VideoPart[]>([]);
+	const [youtubeVideoMetadatas, setYoutubeVideoMetadatas] = useState<
+		YoutubeVideoMetadata[]
+	>([]);
 
 	useEffect(() => {
 		const fetchVideoParts = async () => {
@@ -35,6 +42,20 @@ export default function VideoPartsPage() {
 		fetchVideoParts();
 	}, []);
 
+	useEffect(() => {
+		const fetchYoutubeVideoMetadata = async () => {
+			const querySnapshot = await getDocs(
+				collection(firebaseContext.db, 'YoutubeVideoMetadata')
+			);
+			setYoutubeVideoMetadatas(
+				querySnapshot.docs.map((doc) =>
+					youtubeVideoMetadataConverter.fromFirestore(doc, undefined)
+				)
+			);
+		};
+		fetchYoutubeVideoMetadata();
+	}, [videoParts]);
+
 	return (
 		<>
 			<h1>VideoPartsPage</h1>
@@ -45,6 +66,8 @@ export default function VideoPartsPage() {
 						<TableRow>
 							<TableCell></TableCell>
 							<TableCell>youtubeId</TableCell>
+							<TableCell>authorName</TableCell>
+							<TableCell>title</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -54,7 +77,23 @@ export default function VideoPartsPage() {
 							),
 						].map((youtubeVideoId) => (
 							<ExpandableRow
-								tableCells={[<TableCell>{youtubeVideoId}</TableCell>]}
+								tableCells={[
+									<TableCell>{youtubeVideoId}</TableCell>,
+									<TableCell>
+										{
+											youtubeVideoMetadatas.find(
+												(metadata) => metadata.$id == youtubeVideoId
+											)?.authorName
+										}
+									</TableCell>,
+									<TableCell>
+										{
+											youtubeVideoMetadatas.find(
+												(metadata) => metadata.$id == youtubeVideoId
+											)?.title
+										}
+									</TableCell>,
+								]}
 								key={youtubeVideoId}
 							>
 								<>
