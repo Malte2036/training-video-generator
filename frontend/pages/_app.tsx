@@ -20,7 +20,7 @@ export default function TrainingApp({ Component, pageProps }: AppProps) {
 		onAuthStateChanged(firebaseContext.auth, (user) => {
 			setLoggedIn(user != null);
 		});
-	}, []);
+	}, [firebaseContext.auth]);
 
 	if (loggedIn === undefined) {
 		return <>checkLoggedIn...</>;

@@ -24,6 +24,7 @@ import {
 	Dispatch,
 	FormEvent,
 	SetStateAction,
+	useCallback,
 	useContext,
 	useEffect,
 	useState,
@@ -45,6 +46,13 @@ export default function GenerateRandomVideoForm(props: {
 
 	const [count, setCount] = useState<number | null>();
 
+	const resetStates = useCallback(() => {
+		setSelectedYoutubeVideoIds(
+			new Set(videoParts.map((videoPart) => videoPart.youtubeVideoId))
+		);
+		setCount(null);
+	}, [videoParts]);
+
 	useEffect(() => {
 		const fetchVideoParts = async () => {
 			const querySnapshot = await getDocs(
@@ -57,7 +65,7 @@ export default function GenerateRandomVideoForm(props: {
 			);
 		};
 		fetchVideoParts();
-	}, []);
+	}, [firebaseContext.db]);
 
 	useEffect(() => {
 		const fetchYoutubeVideoMetadata = async () => {
@@ -73,7 +81,7 @@ export default function GenerateRandomVideoForm(props: {
 		fetchYoutubeVideoMetadata();
 
 		resetStates();
-	}, [videoParts]);
+	}, [firebaseContext.db, resetStates, videoParts]);
 
 	async function generateRandomVideo(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -113,13 +121,6 @@ export default function GenerateRandomVideoForm(props: {
 			message: 'Video Generation startet!',
 		});
 		resetStates();
-	}
-
-	function resetStates() {
-		setSelectedYoutubeVideoIds(
-			new Set(videoParts.map((videoPart) => videoPart.youtubeVideoId))
-		);
-		setCount(null);
 	}
 
 	return (

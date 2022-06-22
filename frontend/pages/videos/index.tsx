@@ -51,7 +51,6 @@ function VideosPage() {
 					generatedVideoConverter.fromFirestore(doc, undefined)
 				)
 			);
-			console.log(generatedVideos);
 		};
 		fetchGeneratedVideos();
 
@@ -67,7 +66,7 @@ function VideosPage() {
 			}
 		);
 		return () => unsubscribe();
-	}, []);
+	}, [firebaseContext.db]);
 
 	useEffect(() => {
 		if (alertData) {

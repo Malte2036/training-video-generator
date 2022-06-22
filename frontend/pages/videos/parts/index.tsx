@@ -40,7 +40,7 @@ export default function VideoPartsPage() {
 			);
 		};
 		fetchVideoParts();
-	}, []);
+	}, [firebaseContext.db]);
 
 	useEffect(() => {
 		const fetchYoutubeVideoMetadata = async () => {
@@ -54,7 +54,7 @@ export default function VideoPartsPage() {
 			);
 		};
 		fetchYoutubeVideoMetadata();
-	}, [videoParts]);
+	}, [firebaseContext.db, videoParts]);
 
 	return (
 		<>
@@ -81,22 +81,24 @@ export default function VideoPartsPage() {
 						].map((youtubeVideoId) => (
 							<ExpandableRow
 								tableCells={[
-									<TableCell>{youtubeVideoId}</TableCell>,
-									<TableCell>
+									<TableCell key={'youtubeVideoId'}>
+										{youtubeVideoId}
+									</TableCell>,
+									<TableCell key={'authorName'}>
 										{
 											youtubeVideoMetadatas.find(
 												(metadata) => metadata.$id == youtubeVideoId
 											)?.authorName
 										}
 									</TableCell>,
-									<TableCell>
+									<TableCell key={'title'}>
 										{
 											youtubeVideoMetadatas.find(
 												(metadata) => metadata.$id == youtubeVideoId
 											)?.title
 										}
 									</TableCell>,
-									<TableCell>
+									<TableCell key={'start'}>
 										{
 											videoParts
 												.filter(
@@ -106,7 +108,7 @@ export default function VideoPartsPage() {
 												.sort((a, b) => a.start - b.start)[0].start
 										}
 									</TableCell>,
-									<TableCell>
+									<TableCell key={'count'}>
 										{
 											videoParts.filter(
 												(videoPart) =>
@@ -114,7 +116,7 @@ export default function VideoPartsPage() {
 											).length
 										}
 									</TableCell>,
-									<TableCell>
+									<TableCell key={'buttons'}>
 										<Button
 											onClick={async () => {
 												await Promise.all(
