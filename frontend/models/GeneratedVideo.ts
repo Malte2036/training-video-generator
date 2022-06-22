@@ -10,14 +10,14 @@ export enum GeneratedVideoState {
 export class GeneratedVideo {
 	public $id: string;
 	public videoPartIds: string[];
-	public timestamp?: Timestamp;
+	public timestamp: Timestamp;
 	public state?: GeneratedVideoState;
 	public storageId?: string;
 
 	constructor(
 		$id: string,
 		videoPartIds: string[],
-		timestamp?: Timestamp,
+		timestamp: Timestamp,
 		state?: GeneratedVideoState,
 		storageId?: string
 	) {
