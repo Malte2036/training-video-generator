@@ -79,4 +79,5 @@ typings/
 .dynamodb/ 
 
 serviceAccountKey.json
-temp
+temp/*
+!temp/.gitkeep
