@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import ytdl from "ytdl-core";
 import { deleteContentOfDir } from "./utils";
-import { generateVideo } from "./videoGenerator";
+import { VideoGenerator, VideoPart } from "./videoGenerator";
 
 enum GeneratedVideoState {
   UNKNOWN = "unknown",
@@ -50,16 +50,24 @@ async function main() {
           generatedVideosCollection
             .doc(doc.id)
             .update({ state: GeneratedVideoState.GENERATING });
+
           const videoPartIds: string[] = doc.data().videoPartIds;
-          const videoParts = await Promise.all(
+          const videoPartsData = await Promise.all(
             videoPartIds.map(
               async (p) => await videoPartsCollection.doc(p).get()
             )
           );
-          videoParts.forEach((p) => console.log(p.data()));
+          const videoParts: VideoPart[] = videoPartsData.map((data) => ({
+            $id: data.id,
+            youtubeVideoId: data.data()!.youtubeVideoId,
+            start: data.data()!.start,
+            end: data.data()!.end,
+          }));
 
           const filename = doc.id;
-          await generateVideo(videoParts, filename);
+          const currentVideoGenerator = new VideoGenerator(videoParts, filename);
+          await currentVideoGenerator.generate();
+
           await uploadVideoToStorage(filename);
           generatedVideosCollection.doc(doc.id).update({
             state: GeneratedVideoState.GENERATED,
