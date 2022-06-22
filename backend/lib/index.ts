@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 import ytdl from "ytdl-core";
 import { deleteContentOfDir } from "./utils";
 import { VideoGenerator, VideoPart } from "./videoGenerator";
+import * as queue from "queue";
 
 enum GeneratedVideoState {
   UNKNOWN = "unknown",
@@ -25,6 +26,8 @@ const youtubeVideoMetadataCollection = firestore.collection(
 );
 const generatedVideosCollection = firestore.collection("GeneratedVideos");
 
+const videoGeneratorQueue = queue.default({ autostart: true, concurrency: 1 });
+
 async function uploadVideoToStorage(filename: string) {
   await storage.bucket().upload(`temp/${filename}.mp4`);
   console.log("uploaded video to storage!");
@@ -41,12 +44,16 @@ async function main() {
       .filter((d) => d.type === "added" || d.type === "modified")
       .map((d) => d.doc);
 
-    await Promise.all(
-      snapshotDocsAdded.map(async (doc) => {
-        if (
-          !doc.data().state ||
-          doc.data().state === GeneratedVideoState.UNKNOWN
-        ) {
+    snapshotDocsAdded.forEach(async (doc) => {
+      if (
+        !doc.data().state ||
+        doc.data().state === GeneratedVideoState.UNKNOWN
+      ) {
+        videoGeneratorQueue.push(async () => {
+          try {
+            deleteContentOfDir("temp");
+          } catch (error) {}
+
           generatedVideosCollection
             .doc(doc.id)
             .update({ state: GeneratedVideoState.GENERATING });
@@ -65,7 +72,11 @@ async function main() {
           }));
 
           const filename = doc.id;
-          const currentVideoGenerator = new VideoGenerator(videoParts, filename);
+          const currentVideoGenerator = new VideoGenerator(
+            videoParts,
+            filename
+          );
+
           await currentVideoGenerator.generate();
 
           await uploadVideoToStorage(filename);
@@ -73,40 +84,38 @@ async function main() {
             state: GeneratedVideoState.GENERATED,
             storageId: `${filename}.mp4`,
           });
+        });
+      }
+    });
+  });
+
+  videoPartsCollection.onSnapshot(async (snapshot) => {
+    const snapshotDocsAdded = snapshot
+      .docChanges()
+      .filter((d) => d.type === "added" || d.type === "modified")
+      .map((d) => d.doc);
+
+    await Promise.all(
+      Array.from(
+        new Set(
+          snapshotDocsAdded.map((videoPart) => videoPart.data()!.youtubeVideoId)
+        )
+      ).map(async (youtubeVideoId) => {
+        const info = await ytdl.getBasicInfo(youtubeVideoId);
+        const docData = {
+          title: info.videoDetails.title,
+          authorName: info.videoDetails.author.name,
+        };
+
+        const ref = youtubeVideoMetadataCollection.doc(youtubeVideoId);
+        if (!(await ref.get()).exists) {
+          ref.set(docData);
+        } else {
+          ref.update(docData);
         }
+        console.log(`Add YoutubeMetadata for ${youtubeVideoId}`);
       })
     );
-
-    videoPartsCollection.onSnapshot(async (snapshot) => {
-      const snapshotDocsAdded = snapshot
-        .docChanges()
-        .filter((d) => d.type === "added" || d.type === "modified")
-        .map((d) => d.doc);
-
-      await Promise.all(
-        Array.from(
-          new Set(
-            snapshotDocsAdded.map(
-              (videoPart) => videoPart.data()!.youtubeVideoId
-            )
-          )
-        ).map(async (youtubeVideoId) => {
-          const info = await ytdl.getBasicInfo(youtubeVideoId);
-          const docData = {
-            title: info.videoDetails.title,
-            authorName: info.videoDetails.author.name,
-          };
-
-          const ref = youtubeVideoMetadataCollection.doc(youtubeVideoId);
-          if (!(await ref.get()).exists) {
-            ref.set(docData);
-          } else {
-            ref.update(docData);
-          }
-          console.log(`Add YoutubeMetadata for ${youtubeVideoId}`);
-        })
-      );
-    });
   });
 }
 

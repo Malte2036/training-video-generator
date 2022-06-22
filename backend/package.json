@@ -15,6 +15,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
+    "queue": "^6.0.2",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.3",
     "ytdl-core": "^4.11.0"
