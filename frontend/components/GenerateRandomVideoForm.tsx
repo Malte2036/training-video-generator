@@ -72,9 +72,7 @@ export default function GenerateRandomVideoForm(props: {
 		};
 		fetchYoutubeVideoMetadata();
 
-		setSelectedYoutubeVideoIds(
-			new Set(videoParts.map((videoPart) => videoPart.youtubeVideoId))
-		);
+		resetStates();
 	}, [videoParts]);
 
 	async function generateRandomVideo(event: FormEvent<HTMLFormElement>) {
@@ -106,10 +104,22 @@ export default function GenerateRandomVideoForm(props: {
 				''
 			)
 		);
+		window.scrollTo({
+			top: 0,
+			behavior: 'smooth',
+		});
 		props.setAlertData({
 			title: 'Success',
 			message: 'Video Generation startet!',
 		});
+		resetStates();
+	}
+
+	function resetStates() {
+		setSelectedYoutubeVideoIds(
+			new Set(videoParts.map((videoPart) => videoPart.youtubeVideoId))
+		);
+		setCount(null);
 	}
 
 	return (
