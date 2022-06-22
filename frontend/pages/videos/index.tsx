@@ -5,6 +5,8 @@ import {
 	generatedVideoConverter,
 } from '@/models/GeneratedVideo';
 import {
+	Alert,
+	AlertTitle,
 	Button,
 	Paper,
 	Table,
@@ -25,11 +27,19 @@ import { getDownloadURL, ref } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
+export type AlertData = {
+	title: string;
+	message: string;
+	onClose?: () => void;
+};
+
 function VideosPage() {
 	const firebaseContext = useContext(FirebaseContext);
 	const router = useRouter();
 
 	const [generatedVideos, setGeneratedVideos] = useState<GeneratedVideo[]>([]);
+
+	const [alertData, setAlertData] = useState<AlertData | undefined>(undefined);
 
 	useEffect(() => {
 		const fetchGeneratedVideos = async () => {
@@ -59,8 +69,35 @@ function VideosPage() {
 		return () => unsubscribe();
 	}, []);
 
+	useEffect(() => {
+		if (alertData) {
+			const alertDataCopy = alertData;
+			const timer = setTimeout(() => {
+				if (alertDataCopy == alertData) {
+					setAlertData(undefined);
+				}
+			}, 20000);
+			return () => clearTimeout(timer);
+		}
+	}, [alertData]);
+
 	return (
 		<div>
+			<br />
+			{alertData && (
+				<Alert
+					onClose={() => {
+						if (alertData.onClose) {
+							alertData.onClose();
+						}
+						setAlertData(undefined);
+					}}
+					severity="success"
+				>
+					<AlertTitle>{alertData.title}</AlertTitle>
+					{alertData.message}
+				</Alert>
+			)}
 			<h1>VideosPage</h1>
 			<TableContainer component={Paper}>
 				<Table>
@@ -130,7 +167,7 @@ function VideosPage() {
 				</Table>
 			</TableContainer>
 			<br />
-			<GenerateRandomVideoForm />
+			<GenerateRandomVideoForm setAlertData={setAlertData} />
 		</div>
 	);
 }

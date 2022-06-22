@@ -9,6 +9,7 @@ import {
 	YoutubeVideoMetadata,
 	youtubeVideoMetadataConverter,
 } from '@/models/YoutubeVideoMetadata';
+import { AlertData } from '@/pages/videos';
 import { addDoc, collection, getDocs, Timestamp } from '@firebase/firestore';
 import { Label } from '@mui/icons-material';
 import {
@@ -19,9 +20,18 @@ import {
 	Input,
 } from '@mui/material';
 import { useRouter } from 'next/router';
-import { FormEvent, useContext, useEffect, useState } from 'react';
+import {
+	Dispatch,
+	FormEvent,
+	SetStateAction,
+	useContext,
+	useEffect,
+	useState,
+} from 'react';
 
-export default function GenerateRandomVideoForm() {
+export default function GenerateRandomVideoForm(props: {
+	setAlertData: Dispatch<SetStateAction<AlertData | undefined>>;
+}) {
 	const firebaseContext = useContext(FirebaseContext);
 
 	const [videoParts, setVideoParts] = useState<VideoPart[]>([]);
@@ -96,6 +106,10 @@ export default function GenerateRandomVideoForm() {
 				''
 			)
 		);
+		props.setAlertData({
+			title: 'Success',
+			message: 'Video Generation startet!',
+		});
 	}
 
 	return (
