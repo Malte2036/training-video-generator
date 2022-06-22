@@ -70,6 +70,7 @@ export default function VideoPartsPage() {
 							<TableCell>title</TableCell>
 							<TableCell>start</TableCell>
 							<TableCell>count</TableCell>
+							<TableCell></TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -112,6 +113,33 @@ export default function VideoPartsPage() {
 													videoPart.youtubeVideoId == youtubeVideoId
 											).length
 										}
+									</TableCell>,
+									<TableCell>
+										<Button
+											onClick={async () => {
+												await Promise.all(
+													videoParts
+														.filter(
+															(videoPart) =>
+																videoPart.youtubeVideoId == youtubeVideoId
+														)
+														.map(
+															async (videoPart) =>
+																await deleteDoc(
+																	doc(
+																		firebaseContext.db,
+																		'VideoParts',
+																		videoPart.$id
+																	)
+																)
+														)
+												);
+
+												router.reload();
+											}}
+										>
+											delete
+										</Button>
 									</TableCell>,
 								]}
 								key={youtubeVideoId}
