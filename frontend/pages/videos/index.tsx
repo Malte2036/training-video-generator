@@ -76,7 +76,7 @@ function VideosPage() {
 				if (alertDataCopy == alertData) {
 					setAlertData(undefined);
 				}
-			}, 20000);
+			}, 15000);
 			return () => clearTimeout(timer);
 		}
 	}, [alertData]);
@@ -86,6 +86,7 @@ function VideosPage() {
 			<br />
 			{alertData && (
 				<Alert
+					style={{ position: 'fixed', left: '30%', right: '30%', width: '40%' }}
 					onClose={() => {
 						if (alertData.onClose) {
 							alertData.onClose();
