@@ -29,7 +29,7 @@ const generatedVideosCollection = firestore.collection("GeneratedVideos");
 async function downloadVideo(youtubeVideoId: string, filename: string) {
   await new Promise((resolve, reject) => {
     const stream = ytdl(`https://www.youtube.com/watch?v=${youtubeVideoId}`, {
-      quality: "136",
+      quality: "highestvideo",
     }).pipe(createWriteStream(filename));
 
     stream.on("finish", () => {
