@@ -113,31 +113,38 @@ export default function GenerateRandomVideoForm() {
 					{videoParts
 						.map((videoPart) => videoPart.youtubeVideoId)
 						.filter((v, i, a) => a.indexOf(v) === i)
-						.map((youtubeVideoId) => (
+						.map(
+							(youtubeVideoId) =>
+								youtubeVideoMetadatas.find(
+									(youtubeVideoMetadata) =>
+										youtubeVideoMetadata.$id == youtubeVideoId
+								) ?? null
+						)
+						.filter((youtubeVideoMetadata) => youtubeVideoMetadata !== null)
+						.map((youtubeVideoMetaData) => (
 							<FormControlLabel
-								key={youtubeVideoId}
+								key={youtubeVideoMetaData!.$id}
 								control={
 									<Checkbox
-										checked={selectedYoutubeVideoIds.has(youtubeVideoId)}
+										checked={selectedYoutubeVideoIds.has(
+											youtubeVideoMetaData!.$id
+										)}
 										onChange={(event, checked) => {
 											event.preventDefault();
 											setSelectedYoutubeVideoIds((state) => {
 												if (checked) {
-													return new Set(state.add(youtubeVideoId));
+													return new Set(state.add(youtubeVideoMetaData!.$id));
 												} else {
-													state.delete(youtubeVideoId);
+													state.delete(youtubeVideoMetaData!.$id);
 													return new Set(state);
 												}
 											});
 										}}
 									/>
 								}
-								label={
-									youtubeVideoMetadatas.find(
-										(youtubeVideoMetadata) =>
-											youtubeVideoMetadata.$id == youtubeVideoId
-									)?.title
-								}
+								label={`${youtubeVideoMetaData!.authorName}: ${
+									youtubeVideoMetaData!.title
+								}`}
 							/>
 						))}
 				</FormGroup>
