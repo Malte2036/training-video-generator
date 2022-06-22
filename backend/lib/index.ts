@@ -61,7 +61,7 @@ async function generateVideo(
           .setStartTime(data.start)
           .setDuration(data.end - data.start)
           .noAudio()
-          .saveToFile(`temp/${videoPart.id}.avi`)
+          .saveToFile(`temp/${videoPart.id}_without_beep.avi`)
           .on("error", function (err) {
             console.log("An error occurred: " + err.message);
             reject("An error occurred: " + err.message);
@@ -72,6 +72,26 @@ async function generateVideo(
           });
       });
     })
+  );
+
+  await Promise.all(
+    videoParts.map(
+      async (videoPart) =>
+        await new Promise(async (resolve, reject) => {
+          Ffmpeg()
+            .addInput(`temp/${videoPart.id}_without_beep.avi`)
+            .addInput(`assets/BeepSoundEffect.mp4`)
+            .saveToFile(`temp/${videoPart.id}.avi`)
+            .on("error", function (err) {
+              console.log("An error occurred: " + err.message);
+              reject("An error occurred: " + err.message);
+            })
+            .on("end", function () {
+              console.log(`added beep sound to ${videoPart.id} !`);
+              resolve(`added beep sound to ${videoPart.id} !`);
+            });
+        })
+    )
   );
 
   await new Promise(async (resolve, reject) => {
@@ -163,7 +183,7 @@ async function main() {
           } else {
             ref.update(docData);
           }
-          console.log(`Add YoutubeMetadata for ${youtubeVideoId}`)
+          console.log(`Add YoutubeMetadata for ${youtubeVideoId}`);
         })
       );
     });
