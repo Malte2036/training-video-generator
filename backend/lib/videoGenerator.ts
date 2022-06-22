@@ -35,7 +35,7 @@ export class VideoGenerator {
           const stream = ytdl(
             `https://www.youtube.com/watch?v=${youtubeVideoId}`,
             {
-              quality: "highestvideo",
+              quality: "136",
             }
           ).pipe(createWriteStream(`temp/${youtubeVideoId}.avi`));
 
