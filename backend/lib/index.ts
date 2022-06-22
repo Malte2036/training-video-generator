@@ -51,46 +51,51 @@ async function main() {
         doc.data().state === GeneratedVideoState.UNKNOWN
       ) {
         videoGeneratorQueue.push(async () => {
-          try {
+          if (
+            !doc.data().state ||
+            doc.data().state === GeneratedVideoState.UNKNOWN
+          ) {
             try {
-              deleteContentOfDir("temp");
-            } catch (error) {}
+              try {
+                deleteContentOfDir("temp");
+              } catch (error) {}
 
-            generatedVideosCollection
-              .doc(doc.id)
-              .update({ state: GeneratedVideoState.GENERATING });
+              generatedVideosCollection
+                .doc(doc.id)
+                .update({ state: GeneratedVideoState.GENERATING });
 
-            const videoPartIds: string[] = doc.data().videoPartIds;
-            const videoPartsData = await Promise.all(
-              videoPartIds.map(
-                async (p) => await videoPartsCollection.doc(p).get()
-              )
-            );
-            const videoParts: VideoPart[] = videoPartsData.map((data) => ({
-              $id: data.id,
-              youtubeVideoId: data.data()!.youtubeVideoId,
-              start: data.data()!.start,
-              end: data.data()!.end,
-            }));
+              const videoPartIds: string[] = doc.data().videoPartIds;
+              const videoPartsData = await Promise.all(
+                videoPartIds.map(
+                  async (p) => await videoPartsCollection.doc(p).get()
+                )
+              );
+              const videoParts: VideoPart[] = videoPartsData.map((data) => ({
+                $id: data.id,
+                youtubeVideoId: data.data()!.youtubeVideoId,
+                start: data.data()!.start,
+                end: data.data()!.end,
+              }));
 
-            const filename = doc.id;
-            const currentVideoGenerator = new VideoGenerator(
-              videoParts,
-              filename
-            );
+              const filename = doc.id;
+              const currentVideoGenerator = new VideoGenerator(
+                videoParts,
+                filename
+              );
 
-            await currentVideoGenerator.generate();
+              await currentVideoGenerator.generate();
 
-            await uploadVideoToStorage(filename);
-            generatedVideosCollection.doc(doc.id).update({
-              state: GeneratedVideoState.GENERATED,
-              storageId: `${filename}.mp4`,
-            });
-          } catch (error) {
-            console.log(`ERROR: with ${doc.id}`)
-            generatedVideosCollection.doc(doc.id).update({
-              state: GeneratedVideoState.ERROR,
-            });
+              await uploadVideoToStorage(filename);
+              generatedVideosCollection.doc(doc.id).update({
+                state: GeneratedVideoState.GENERATED,
+                storageId: `${filename}.mp4`,
+              });
+            } catch (error) {
+              console.log(`ERROR: with ${doc.id}`);
+              generatedVideosCollection.doc(doc.id).update({
+                state: GeneratedVideoState.ERROR,
+              });
+            }
           }
         });
       }
