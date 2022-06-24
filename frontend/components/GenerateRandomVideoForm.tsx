@@ -117,7 +117,6 @@ export default function GenerateRandomVideoForm(props: {
 			behavior: 'smooth',
 		});
 		props.setAlertData({
-			title: 'Success',
 			message: 'Video Generation startet!',
 		});
 		resetStates();

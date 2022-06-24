@@ -6,9 +6,9 @@ import {
 } from '@/models/GeneratedVideo';
 import {
 	Alert,
-	AlertTitle,
 	Button,
 	Paper,
+	Snackbar,
 	Table,
 	TableBody,
 	TableCell,
@@ -28,7 +28,6 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
 export type AlertData = {
-	title: string;
 	message: string;
 	onClose?: () => void;
 };
@@ -68,36 +67,21 @@ function VideosPage() {
 		return () => unsubscribe();
 	}, [firebaseContext.db]);
 
-	useEffect(() => {
-		if (alertData) {
-			const alertDataCopy = alertData;
-			const timer = setTimeout(() => {
-				if (alertDataCopy == alertData) {
-					setAlertData(undefined);
-				}
-			}, 15000);
-			return () => clearTimeout(timer);
-		}
-	}, [alertData]);
-
 	return (
 		<div>
 			<br />
-			{alertData && (
+			<Snackbar open={alertData != undefined} autoHideDuration={10000} onClose={() => {
+				if (alertData?.onClose) {
+					alertData?.onClose();
+				}
+				setAlertData(undefined);
+			}}>
 				<Alert
-					style={{ position: 'fixed', left: '30%', right: '30%', width: '40%' }}
-					onClose={() => {
-						if (alertData.onClose) {
-							alertData.onClose();
-						}
-						setAlertData(undefined);
-					}}
-					severity="success"
-				>
-					<AlertTitle>{alertData.title}</AlertTitle>
-					{alertData.message}
+					severity="success" sx={{ width: '100%' }}>
+					{alertData?.message}
 				</Alert>
-			)}
+			</Snackbar>
+
 			<h1>VideosPage</h1>
 			<TableContainer component={Paper}>
 				<Table>
