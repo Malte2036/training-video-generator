@@ -129,7 +129,10 @@ export default function GenerateRandomVideoForm(props: {
 					placeholder="count"
 					type={'number'}
 					value={count ?? ''}
-					onChange={(event) => setCount(Number.parseInt(event.target.value))}
+					onChange={(event) => {
+						const c = Number.parseInt(event.target.value);
+						setCount(!isNaN(c) && c >= 1 ? c : null);
+					}}
 				></Input>
 				<br />
 				<span>Included Videos:</span>
