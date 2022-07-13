@@ -9,6 +9,8 @@ export type VideoPart = {
   end: number;
 };
 
+const FPS = 30;
+
 export class VideoGenerator {
   videoParts: VideoPart[];
   filename: string;
@@ -57,6 +59,7 @@ export class VideoGenerator {
             .setStartTime(videoPart.start)
             .setDuration(videoPart.end - videoPart.start)
             .noAudio()
+            .fps(FPS)
             .saveToFile(`temp/${videoPart.$id}_without_beep.avi`)
             .on("error", function (err) {
               console.log("An error occurred: " + err.message);
@@ -79,6 +82,7 @@ export class VideoGenerator {
             Ffmpeg()
               .addInput(`temp/${videoPart.$id}_without_beep.avi`)
               .addInput(`assets/BeepSoundEffect.mp4`)
+              .fps(FPS)
               .saveToFile(`temp/${videoPart.$id}.avi`)
               .on("error", function (err) {
                 console.log("An error occurred: " + err.message);
@@ -94,7 +98,7 @@ export class VideoGenerator {
   }
 
   async mergeVideoParts() {
-      console.log("mergeVideoParts")
+    console.log("mergeVideoParts");
     await new Promise(async (resolve, reject) => {
       const command = Ffmpeg();
       this.videoParts.forEach((videoPart) =>
@@ -102,6 +106,7 @@ export class VideoGenerator {
       );
 
       command
+        .fps(FPS)
         .mergeToFile(`temp/${this.filename}.mp4`)
         .on("error", function (err) {
           console.log("An error occurred: " + err.message);
