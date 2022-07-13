@@ -81,3 +81,4 @@ typings/
 serviceAccountKey.json
 temp/*
 !temp/.gitkeep
+dist/
