@@ -85,7 +85,12 @@ async function main() {
                                 filename
                             );
 
-                            await currentVideoGenerator.generate();
+                            await currentVideoGenerator.generate((percent: number) => {
+                                generatedVideosCollection.doc(doc.id).update({
+                                    mergeVideoPartsPercent: percent.toFixed(0)
+                                });
+                                console.log('Processing: ' + percent.toFixed(0) + '% done');
+                            });
 
                             await uploadVideoToStorage(filename);
                             generatedVideosCollection.doc(doc.id).update({

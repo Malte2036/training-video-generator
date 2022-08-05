@@ -25,13 +25,13 @@ export class VideoGenerator {
         this.videoPartsNotAlreadyDownloaded = this.getAllNotDownloadedVideoParts()
     }
 
-    public async generate() {
+    public async generate(updateProgressCallback: (percent: number) => void) {
         console.log(this.videoPartsNotAlreadyDownloaded.map(value => value))
 
         await this.downloadAllYoutubeVideos();
         await this.cutVideoParts();
         await this.addBeepSoundToVideoParts();
-        await this.mergeVideoParts();
+        await this.mergeVideoParts(updateProgressCallback);
     }
 
     getAllNotDownloadedVideoParts(): VideoPart[] {
@@ -113,7 +113,7 @@ export class VideoGenerator {
         );
     }
 
-    async mergeVideoParts() {
+    async mergeVideoParts(updateProgressCallback: (percent: number) => void) {
         console.log("mergeVideoParts");
         await new Promise(async (resolve, reject) => {
             const command = Ffmpeg();
@@ -121,9 +121,19 @@ export class VideoGenerator {
                 command.addInput(`${videoPartFilesPath}/${videoPart.$id}.avi`)
             );
 
+            let totalTime = this.videoParts
+                .map(videoPart => videoPart.end - videoPart.start)
+                .reduce((accumulator, current) => accumulator + current, 0) * FPS
+
             command
                 .fps(FPS)
                 .mergeToFile(`${tempFilesPath}${this.filename}.mp4`)
+                .on('progress', progress => {
+                    const frames: number = progress.frames
+                    const percent = frames / totalTime * 100
+
+                    updateProgressCallback(percent)
+                })
                 .on("error", function (err) {
                     console.log("An error occurred: " + err.message);
                     reject("An error occurred: " + err.message);
