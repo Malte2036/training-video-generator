@@ -11,6 +11,7 @@ export type VideoPart = {
 
 const FPS = 30;
 const videoPartFilesPath = "files/videoParts/"
+const youtubeVideoFilesPath = "files/youtubeVideos/"
 export const tempFilesPath = "files/temp/"
 
 export class VideoGenerator {
@@ -37,12 +38,16 @@ export class VideoGenerator {
         return this.videoParts.filter((videoPart => !existsSync(`${videoPartFilesPath}/${videoPart.$id}.avi`)))
     }
 
-    async downloadAllYoutubeVideos() {
+    getAllNotDownloadedYoutubeVideos(): string[] {
         const allYoutubeVideoIds = Array.from(
             new Set(this.videoPartsNotAlreadyDownloaded.map((videoPart) => videoPart.youtubeVideoId))
         );
+        return allYoutubeVideoIds.filter((youtubeVideoId => !existsSync(`${youtubeVideoFilesPath}/${youtubeVideoId}.avi`)))
+    }
+
+    async downloadAllYoutubeVideos() {
         await Promise.all(
-            allYoutubeVideoIds.map(async (youtubeVideoId) => {
+            this.getAllNotDownloadedYoutubeVideos().map(async (youtubeVideoId) => {
                 console.log(`start ${youtubeVideoId}`);
                 await new Promise((resolve, reject) => {
                     const stream = ytdl(
@@ -50,7 +55,7 @@ export class VideoGenerator {
                         {
                             quality: "136",
                         }
-                    ).pipe(createWriteStream(`${tempFilesPath}/${youtubeVideoId}.avi`));
+                    ).pipe(createWriteStream(`${youtubeVideoFilesPath}/${youtubeVideoId}.avi`));
 
                     stream.on("finish", () => {
                         console.log(`downloaded video ${youtubeVideoId}`);
@@ -66,7 +71,7 @@ export class VideoGenerator {
             this.videoPartsNotAlreadyDownloaded.map(async (videoPart) => {
                 await new Promise(async (resolve, reject) => {
                     Ffmpeg()
-                        .addInput(`${tempFilesPath}${videoPart.youtubeVideoId}.avi`)
+                        .addInput(`${youtubeVideoFilesPath}${videoPart.youtubeVideoId}.avi`)
                         .setStartTime(videoPart.start)
                         .setDuration(videoPart.end - videoPart.start)
                         .noAudio()

@@ -90,3 +90,6 @@ files/temp/*
 
 files/videoParts/*
 !files/videoParts/.gitkeep
+
+files/youtubeVideos/*
+!files/youtubeVideos/.gitkeep
