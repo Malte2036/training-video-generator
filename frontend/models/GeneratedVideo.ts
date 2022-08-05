@@ -13,6 +13,7 @@ export class GeneratedVideo {
     public timestamp: Timestamp;
 
     public state?: GeneratedVideoState;
+    public mergeVideoPartsPercent?: number
     public storageId?: string;
 
     constructor(
@@ -20,12 +21,14 @@ export class GeneratedVideo {
         videoPartIds: string[],
         timestamp: Timestamp,
         state?: GeneratedVideoState,
+        mergeVideoPartsPercent?: number,
         storageId?: string
     ) {
         this.$id = $id;
         this.videoPartIds = videoPartIds;
         this.state = state;
         this.timestamp = timestamp;
+        this.mergeVideoPartsPercent = mergeVideoPartsPercent;
         this.storageId = storageId;
     }
 }
@@ -37,6 +40,7 @@ export const generatedVideoConverter = {
             videoPartIds: generatedVideo.videoPartIds,
             timestamp: generatedVideo.timestamp,
             state: generatedVideo.state,
+            mergeVideoPartsPercent: generatedVideo.mergeVideoPartsPercent,
             storageId: generatedVideo.storageId,
         };
     },
@@ -47,6 +51,7 @@ export const generatedVideoConverter = {
             data.videoPartIds,
             data.timestamp,
             data.state,
+            data.mergeVideoPartsPercent,
             data.storageId
         );
     },

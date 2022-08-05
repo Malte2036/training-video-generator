@@ -105,6 +105,7 @@ export default function GenerateRandomVideoForm(props: {
                 videoPartIds,
                 Timestamp.now(),
                 GeneratedVideoState.UNKNOWN,
+                0,
                 ''
             )
         );

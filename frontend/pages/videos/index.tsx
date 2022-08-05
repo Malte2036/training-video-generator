@@ -91,6 +91,7 @@ function VideosPage() {
                             <TableCell>videoPartIds</TableCell>
                             <TableCell>state</TableCell>
                             <TableCell>storageId</TableCell>
+                            <TableCell>mergedVideoPartsPercent</TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
                         </TableRow>
@@ -116,6 +117,7 @@ function VideosPage() {
                                     </TableCell>
                                     <TableCell>{video.state}</TableCell>
                                     <TableCell>{video.storageId}</TableCell>
+                                <TableCell>{video.mergeVideoPartsPercent && `${video.mergeVideoPartsPercent}%`}</TableCell>
                                     <TableCell>
                                         {video.storageId && (
                                             <Button
