@@ -24,7 +24,13 @@ COPY serviceAccountKey.json ./
 
 COPY assets ./assets
 
-RUN mkdir /home/training-video-generator-backend/temp
+RUN mkdir /home/training-video-generator-backend/files
+
+RUN mkdir /home/training-video-generator-backend/files/temp
+
+RUN mkdir /home/training-video-generator-backend/files/videoParts
+
+RUN mkdir /home/training-video-generator-backend/files/youtubeVideos
 
 RUN apk add --no-cache ffmpeg
 
