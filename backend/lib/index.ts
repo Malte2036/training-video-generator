@@ -45,7 +45,7 @@ async function main() {
       .filter((d) => d.type === "added" || d.type === "modified")
       .map((d) => d.doc);
 
-    snapshotDocsAdded.forEach(async (doc) => {
+    snapshotDocsAdded.map(async (doc) => {
       if (
         !doc.data().state ||
         doc.data().state === GeneratedVideoState.UNKNOWN
@@ -60,7 +60,7 @@ async function main() {
                 deleteContentOfDir("temp");
               } catch (error) {}
 
-              generatedVideosCollection
+              await generatedVideosCollection
                 .doc(doc.id)
                 .update({ state: GeneratedVideoState.GENERATING });
 
