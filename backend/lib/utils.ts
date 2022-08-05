@@ -6,9 +6,11 @@ export function deleteContentOfDir(directory: string) {
         if (err) throw err;
 
         for (const file of files) {
-            unlink(path.join(directory, file), (err) => {
-                if (err) throw err;
-            });
+            if (file !== ".gitkeep") {
+                unlink(path.join(directory, file), (err) => {
+                    if (err) throw err;
+                });
+            }
         }
     });
 }
