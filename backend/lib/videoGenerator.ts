@@ -1,5 +1,5 @@
 import Ffmpeg from "fluent-ffmpeg";
-import {createWriteStream} from "fs";
+import {createWriteStream, existsSync} from "fs";
 import ytdl from "ytdl-core";
 
 export type VideoPart = {
@@ -10,26 +10,36 @@ export type VideoPart = {
 };
 
 const FPS = 30;
+const videoPartFilesPath = "files/videoParts/"
+export const tempFilesPath = "files/temp/"
 
 export class VideoGenerator {
     videoParts: VideoPart[];
+    videoPartsNotAlreadyDownloaded: VideoPart[];
     filename: string;
 
     constructor(videoParts: VideoPart[], filename: string) {
         this.videoParts = videoParts;
         this.filename = filename;
+        this.videoPartsNotAlreadyDownloaded = this.getAllNotDownloadedVideoParts()
     }
 
     public async generate() {
+        console.log(this.videoPartsNotAlreadyDownloaded.map(value => value))
+
         await this.downloadAllYoutubeVideos();
         await this.cutVideoParts();
         await this.addBeepSoundToVideoParts();
         await this.mergeVideoParts();
     }
 
+    getAllNotDownloadedVideoParts(): VideoPart[] {
+        return this.videoParts.filter((videoPart => !existsSync(`${videoPartFilesPath}/${videoPart.$id}.avi`)))
+    }
+
     async downloadAllYoutubeVideos() {
         const allYoutubeVideoIds = Array.from(
-            new Set(this.videoParts.map((videoPart) => videoPart.youtubeVideoId))
+            new Set(this.videoPartsNotAlreadyDownloaded.map((videoPart) => videoPart.youtubeVideoId))
         );
         await Promise.all(
             allYoutubeVideoIds.map(async (youtubeVideoId) => {
@@ -40,7 +50,7 @@ export class VideoGenerator {
                         {
                             quality: "136",
                         }
-                    ).pipe(createWriteStream(`temp/${youtubeVideoId}.avi`));
+                    ).pipe(createWriteStream(`${tempFilesPath}/${youtubeVideoId}.avi`));
 
                     stream.on("finish", () => {
                         console.log(`downloaded video ${youtubeVideoId}`);
@@ -53,15 +63,15 @@ export class VideoGenerator {
 
     async cutVideoParts() {
         await Promise.all(
-            this.videoParts.map(async (videoPart) => {
+            this.videoPartsNotAlreadyDownloaded.map(async (videoPart) => {
                 await new Promise(async (resolve, reject) => {
                     Ffmpeg()
-                        .addInput(`temp/${videoPart.youtubeVideoId}.avi`)
+                        .addInput(`${tempFilesPath}${videoPart.youtubeVideoId}.avi`)
                         .setStartTime(videoPart.start)
                         .setDuration(videoPart.end - videoPart.start)
                         .noAudio()
                         .fps(FPS)
-                        .saveToFile(`temp/${videoPart.$id}_without_beep.avi`)
+                        .saveToFile(`${tempFilesPath}${videoPart.$id}_without_beep.avi`)
                         .on("error", function (err) {
                             console.log("An error occurred: " + err.message);
                             reject("An error occurred: " + err.message);
@@ -77,14 +87,14 @@ export class VideoGenerator {
 
     async addBeepSoundToVideoParts() {
         await Promise.all(
-            this.videoParts.map(
+            this.videoPartsNotAlreadyDownloaded.map(
                 async (videoPart) =>
                     await new Promise(async (resolve, reject) => {
                         Ffmpeg()
-                            .addInput(`temp/${videoPart.$id}_without_beep.avi`)
+                            .addInput(`${tempFilesPath}${videoPart.$id}_without_beep.avi`)
                             .addInput(`assets/BeepSoundEffect.mp4`)
                             .fps(FPS)
-                            .saveToFile(`temp/${videoPart.$id}.avi`)
+                            .saveToFile(`${videoPartFilesPath}/${videoPart.$id}.avi`)
                             .on("error", function (err) {
                                 console.log("An error occurred: " + err.message);
                                 reject("An error occurred: " + err.message);
@@ -103,12 +113,12 @@ export class VideoGenerator {
         await new Promise(async (resolve, reject) => {
             const command = Ffmpeg();
             this.videoParts.forEach((videoPart) =>
-                command.addInput(`temp/${videoPart.$id}.avi`)
+                command.addInput(`${videoPartFilesPath}/${videoPart.$id}.avi`)
             );
 
             command
                 .fps(FPS)
-                .mergeToFile(`temp/${this.filename}.mp4`)
+                .mergeToFile(`${tempFilesPath}${this.filename}.mp4`)
                 .on("error", function (err) {
                     console.log("An error occurred: " + err.message);
                     reject("An error occurred: " + err.message);

@@ -84,3 +84,9 @@ serviceAccountKey.json
 temp/*
 !temp/.gitkeep
 dist/
+
+files/temp/*
+!files/temp/.gitkeep
+
+files/videoParts/*
+!files/videoParts/.gitkeep

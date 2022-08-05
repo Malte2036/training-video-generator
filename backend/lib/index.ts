@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import ytdl from "ytdl-core";
 import {deleteContentOfDir} from "./utils";
-import {VideoGenerator, VideoPart} from "./videoGenerator";
+import {tempFilesPath, VideoGenerator, VideoPart} from "./videoGenerator";
 import * as queue from "queue";
 
 enum GeneratedVideoState {
@@ -30,13 +30,13 @@ const generatedVideosCollection = firestore.collection("GeneratedVideos");
 const videoGeneratorQueue = queue.default({autostart: true, concurrency: 1});
 
 async function uploadVideoToStorage(filename: string) {
-    await storage.bucket().upload(`temp/${filename}.mp4`);
+    await storage.bucket().upload(`${tempFilesPath}/${filename}.mp4`);
     console.log("uploaded video to storage!");
 }
 
 async function main() {
     try {
-        deleteContentOfDir("temp");
+        deleteContentOfDir(tempFilesPath);
     } catch (error) {
     }
 
@@ -58,7 +58,7 @@ async function main() {
                     ) {
                         try {
                             try {
-                                deleteContentOfDir("temp");
+                                deleteContentOfDir(tempFilesPath);
                             } catch (error) {
                             }
 
@@ -93,7 +93,7 @@ async function main() {
                                 storageId: `${filename}.mp4`,
                             });
                         } catch (error) {
-                            console.log(`ERROR: with ${doc.id}`);
+                            console.log(`ERROR: with ${doc.id}: ${error}`);
                             generatedVideosCollection.doc(doc.id).update({
                                 state: GeneratedVideoState.ERROR,
                             });
