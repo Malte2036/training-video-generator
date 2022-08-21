@@ -150,7 +150,7 @@ function VideosPage() {
                                     (b.timestamp?.toMillis() ?? 0)
                             )
                             .map((video) => (
-                                <TableRow key={video.$id}>
+                                <TableRow key={video.$id} style={video.done ? {opacity: 0.3} : undefined}>
                                     <TableCell>
                                         <Checkbox
                                             checked={video.done}
