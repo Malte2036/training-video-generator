@@ -20,12 +20,15 @@ import {
     collection,
     deleteDoc,
     doc,
+    getDoc,
     getDocs,
     onSnapshot,
 } from 'firebase/firestore';
 import {getDownloadURL, ref} from 'firebase/storage';
 import {useRouter} from 'next/router';
 import {useContext, useEffect, useState} from 'react';
+import {VideoPart, videoPartConverter} from "@/models/VideoPart";
+import {YoutubeVideoMetadata, youtubeVideoMetadataConverter} from '@/models/YoutubeVideoMetadata';
 
 export type AlertData = {
     message: string;
@@ -37,6 +40,9 @@ function VideosPage() {
     const router = useRouter();
 
     const [generatedVideos, setGeneratedVideos] = useState<GeneratedVideo[]>([]);
+
+    const [videoParts, setVideoParts] = useState<VideoPart[]>([]);
+    const [youtubeVideoMetadatas, setYoutubeVideoMetadatas] = useState<YoutubeVideoMetadata[]>([]);
 
     const [alertData, setAlertData] = useState<AlertData | undefined>(undefined);
 
@@ -58,7 +64,6 @@ function VideosPage() {
         const unsubscribe = onSnapshot(
             collection(firebaseContext.db, 'GeneratedVideos'),
             (querySnapshot) => {
-                console.log(querySnapshot);
                 setGeneratedVideos(
                     querySnapshot.docs.map((doc) =>
                         generatedVideoConverter.fromFirestore(doc, undefined)
@@ -68,6 +73,42 @@ function VideosPage() {
         );
         return () => unsubscribe();
     }, [firebaseContext.db]);
+
+
+    useEffect(() => {
+        const fetchVideoParts = async () => {
+            const querySnapshot = await getDocs(
+                collection(firebaseContext.db, 'VideoParts')
+            );
+            setVideoParts(
+                querySnapshot.docs.map((doc) =>
+                    videoPartConverter.fromFirestore(doc, undefined)
+                )
+            );
+        };
+        fetchVideoParts();
+    }, [firebaseContext.db]);
+
+    useEffect(() => {
+        const fetchYoutubeVideoMetadata = async () => {
+            const querySnapshot = await getDocs(
+                collection(firebaseContext.db, 'YoutubeVideoMetadata')
+            );
+            setYoutubeVideoMetadatas(
+                querySnapshot.docs.map((doc) =>
+                    youtubeVideoMetadataConverter.fromFirestore(doc, undefined)
+                )
+            );
+        };
+        fetchYoutubeVideoMetadata();
+    }, [firebaseContext.db, videoParts]);
+
+    function getIncludedVideoMetadatasByGeneratedVideo(video: GeneratedVideo): YoutubeVideoMetadata[] {
+        const includedVideoPartIds = videoParts.filter(videoPart => video.videoPartIds.includes(videoPart.$id))
+            .map(videoPart => videoPart.youtubeVideoId)
+
+        return youtubeVideoMetadatas.filter(metadata => includedVideoPartIds.includes(metadata.$id))
+    }
 
     return (
         <div>
@@ -91,6 +132,7 @@ function VideosPage() {
                         <TableRow>
                             <TableCell>timestamp</TableCell>
                             {debug && <TableCell>videoPartIds</TableCell>}
+                            <TableCell>includedVideos</TableCell>
                             <TableCell>state</TableCell>
                             {debug && <TableCell>storageId</TableCell>}
                             <TableCell>mergedVideoPartsPercent</TableCell>
@@ -117,6 +159,12 @@ function VideosPage() {
                                         </span>
                                         ))}
                                     </TableCell>}
+                                    <TableCell>
+                                        {
+                                            getIncludedVideoMetadatasByGeneratedVideo(video).map(youtubeVideoMetadata => youtubeVideoMetadata.title)
+                                                .join(', ')
+                                        }
+                                    </TableCell>
                                     <TableCell>{video.state}</TableCell>
                                     {debug && <TableCell>{video.storageId}</TableCell>}
                                     <TableCell>{video.mergeVideoPartsPercent && `${video.mergeVideoPartsPercent}%`}</TableCell>
