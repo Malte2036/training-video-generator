@@ -16,13 +16,16 @@ export class GeneratedVideo {
     public mergeVideoPartsPercent?: number
     public storageId?: string;
 
+    public done: boolean;
+
     constructor(
         $id: string,
         videoPartIds: string[],
         timestamp: Timestamp,
         state?: GeneratedVideoState,
         mergeVideoPartsPercent?: number,
-        storageId?: string
+        storageId?: string,
+        done?: boolean
     ) {
         this.$id = $id;
         this.videoPartIds = videoPartIds;
@@ -30,6 +33,8 @@ export class GeneratedVideo {
         this.timestamp = timestamp;
         this.mergeVideoPartsPercent = mergeVideoPartsPercent;
         this.storageId = storageId;
+
+        this.done = done ?? false;
     }
 }
 
@@ -42,6 +47,7 @@ export const generatedVideoConverter = {
             state: generatedVideo.state,
             mergeVideoPartsPercent: generatedVideo.mergeVideoPartsPercent,
             storageId: generatedVideo.storageId,
+            done: generatedVideo.done
         };
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: any) => {
@@ -52,7 +58,8 @@ export const generatedVideoConverter = {
             data.timestamp,
             data.state,
             data.mergeVideoPartsPercent,
-            data.storageId
+            data.storageId,
+            data.done
         );
     },
 };

@@ -7,6 +7,7 @@ import {
 import {
     Alert,
     Button,
+    Checkbox,
     Paper,
     Snackbar,
     Table,
@@ -20,9 +21,9 @@ import {
     collection,
     deleteDoc,
     doc,
-    getDoc,
     getDocs,
     onSnapshot,
+    updateDoc,
 } from 'firebase/firestore';
 import {getDownloadURL, ref} from 'firebase/storage';
 import {useRouter} from 'next/router';
@@ -130,6 +131,7 @@ function VideosPage() {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell></TableCell>
                             <TableCell>timestamp</TableCell>
                             {debug && <TableCell>videoPartIds</TableCell>}
                             <TableCell>includedVideos</TableCell>
@@ -149,6 +151,13 @@ function VideosPage() {
                             )
                             .map((video) => (
                                 <TableRow key={video.$id}>
+                                    <TableCell>
+                                        <Checkbox
+                                            checked={video.done}
+                                            onClick={async () => await updateDoc(doc(firebaseContext.db, 'GeneratedVideos', video.$id), {
+                                                done: !video.done
+                                            })}/>
+                                    </TableCell>
                                     <TableCell>
                                         {video.timestamp?.toDate().toLocaleString() ?? 'unknown'}
                                     </TableCell>
