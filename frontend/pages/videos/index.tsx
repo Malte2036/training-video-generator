@@ -40,6 +40,8 @@ function VideosPage() {
 
     const [alertData, setAlertData] = useState<AlertData | undefined>(undefined);
 
+    const [debug] = useState<boolean>(router.query.hasOwnProperty("debug"))
+
     useEffect(() => {
         const fetchGeneratedVideos = async () => {
             const querySnapshot = await getDocs(
@@ -88,9 +90,9 @@ function VideosPage() {
                     <TableHead>
                         <TableRow>
                             <TableCell>timestamp</TableCell>
-                            <TableCell>videoPartIds</TableCell>
+                            {debug && <TableCell>videoPartIds</TableCell>}
                             <TableCell>state</TableCell>
-                            <TableCell>storageId</TableCell>
+                            {debug && <TableCell>storageId</TableCell>}
                             <TableCell>mergedVideoPartsPercent</TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
@@ -108,16 +110,16 @@ function VideosPage() {
                                     <TableCell>
                                         {video.timestamp?.toDate().toLocaleString() ?? 'unknown'}
                                     </TableCell>
-                                    <TableCell>
+                                    {debug && <TableCell>
                                         {video.videoPartIds.map((id) => (
                                             <span key={id} style={{cursor: 'pointer'}}>
-												{`${id}, `}
-											</span>
+                                        {`${id}, `}
+                                        </span>
                                         ))}
-                                    </TableCell>
+                                    </TableCell>}
                                     <TableCell>{video.state}</TableCell>
-                                    <TableCell>{video.storageId}</TableCell>
-                                <TableCell>{video.mergeVideoPartsPercent && `${video.mergeVideoPartsPercent}%`}</TableCell>
+                                    {debug && <TableCell>{video.storageId}</TableCell>}
+                                    <TableCell>{video.mergeVideoPartsPercent && `${video.mergeVideoPartsPercent}%`}</TableCell>
                                     <TableCell>
                                         {video.storageId && (
                                             <Button
