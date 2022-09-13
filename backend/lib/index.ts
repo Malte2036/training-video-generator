@@ -51,6 +51,20 @@ async function main() {
             .filter((d) => d.type === "removed")
             .map((d) => d.doc);
 
+        snapshotDocsRemoved.forEach((doc) => {
+            if (
+                doc.data().state === GeneratedVideoState.GENERATED
+            ) {
+                try {
+                    const storageId = doc.data()!.storageId
+                    storage.bucket().file(storageId).delete()
+                    console.log(`deleted storage: ${storageId}`);
+                }catch (error){
+                    console.log(`ERROR: with ${doc.id} while deleting storage: ${error}`);
+                }
+            }
+        })
+
         snapshotDocsAdded.map(async (doc) => {
             if (
                 !doc.data().state ||
@@ -112,19 +126,6 @@ async function main() {
                 });
             }
         });
-
-        snapshotDocsRemoved.forEach((doc) => {
-            if (
-                doc.data().state === GeneratedVideoState.GENERATED
-            ) {
-                try {
-                    const storageId = doc.data()!.storageId
-                    storage.bucket().file(storageId).delete()
-                }catch (error){
-                    console.log(`ERROR: with ${doc.id} while deleting storage: ${error}`);
-                }
-            }
-        })
     });
 
     videoPartsCollection.onSnapshot(async (snapshot) => {
