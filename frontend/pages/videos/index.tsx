@@ -111,6 +111,16 @@ function VideosPage() {
         return youtubeVideoMetadatas.filter(metadata => includedVideoPartIds.includes(metadata.$id))
     }
 
+    function getVideoLength(video: GeneratedVideo): string {
+        const length = video.videoPartIds.map(id => videoParts.find(videoPart => videoPart.$id === id))
+            .filter(videoPart => videoPart !== undefined)
+            .map(videoPart => videoPart!.end - videoPart!.start)
+            .reduce<number>((accumulator, current) => {
+                return accumulator + current;
+            }, 0)
+        return `${parseInt((length / 60).toString())}:${length % 60}`
+    }
+
     return (
         <div>
             <br/>
@@ -135,6 +145,7 @@ function VideosPage() {
                             <TableCell>timestamp</TableCell>
                             {debug && <TableCell>videoPartIds</TableCell>}
                             <TableCell>includedVideos</TableCell>
+                            <TableCell>videoLength</TableCell>
                             <TableCell>state</TableCell>
                             {debug && <TableCell>storageId</TableCell>}
                             <TableCell>mergedVideoPartsPercent</TableCell>
@@ -174,6 +185,7 @@ function VideosPage() {
                                                 .join(', ')
                                         }
                                     </TableCell>
+                                    <TableCell>{getVideoLength(video)}min</TableCell>
                                     <TableCell>{video.state}</TableCell>
                                     {debug && <TableCell>{video.storageId}</TableCell>}
                                     <TableCell>{video.mergeVideoPartsPercent && `${video.mergeVideoPartsPercent}%`}</TableCell>
