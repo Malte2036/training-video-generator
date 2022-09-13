@@ -20,7 +20,7 @@ RUN npm install --only=production
 
 COPY --from=0 /home/training-video-generator-backend/dist .
 
-COPY serviceAccountKey.json ./
+# COPY serviceAccountKey.json ./
 
 COPY assets ./assets
 
