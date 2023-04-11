@@ -127,7 +127,7 @@ export class VideoGenerator {
 
             command
                 .fps(FPS)
-                .mergeToFile(`${tempFilesPath}${this.filename}.mp4`)
+                .mergeToFile(`${tempFilesPath}${this.filename}.mp4`, `${tempFilesPath}/merge/`)
                 .on('progress', progress => {
                     const frames: number = progress.frames
                     const percent = frames / totalTime * 100
