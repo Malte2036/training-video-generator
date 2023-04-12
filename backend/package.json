@@ -18,7 +18,7 @@
     "queue": "^6.0.2",
     "ts-node": "^10.8.1",
     "typescript": "^5.0.4",
-    "ytdl-core": "^4.11.2"
+    "ytdl-core": "^4.9.1"
   },
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.20"
